@@ -10,15 +10,41 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
-    "format": {
-      "dependsOn": ["^format"]
-    },
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["DATABASE_URL", "PORT"]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true,
+      "env": ["DATABASE_URL", "PORT"]
+    },
+    "db:generate": {
+      "cache": false,
+      "env": ["DATABASE_URL", "PORT"]
+    },
+    "db:migrate": {
+      "cache": false,
+      "env": ["DATABASE_URL", "PORT"]
+    },
+    "db:push": {
+      "cache": false,
+      "env": ["DATABASE_URL", "PORT"]
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true,
+      "env": ["DATABASE_URL", "PORT"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": ["DATABASE_URL"]
     }
   }
 }
