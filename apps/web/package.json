@@ -7,29 +7,42 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "typecheck": "tsc -b",
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.103.2",
+    "@tanstack/react-query-devtools": "^5.103.2",
+    "@tanstack/react-router": "^1.170.38",
+    "@tanstack/react-router-devtools": "^1.167.2",
     "@workspace/ui": "workspace:*",
+    "hono": "^4.13.8",
     "lucide-react": "^1.47.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@eslint/js": "^10",
+    "@shadcn/lint": "^0.1.5",
     "@tailwindcss/vite": "^4",
+    "@tanstack/router-plugin": "^1.168.40",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6",
+    "@workspace/api": "workspace:*",
     "eslint": "^10",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17",
+    "jsdom": "^30.1.0",
     "typescript": "~6",
     "typescript-eslint": "^8",
-    "vite": "^8"
+    "vite": "^8",
+    "vitest": "^4.1.11"
   }
 }
