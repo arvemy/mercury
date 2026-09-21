@@ -4,3 +4,8 @@ node_modules/
 coverage/
 pnpm-lock.yaml
 .pnpm-store/
+apps/api/drizzle/
+.agents/
+.claude/
+skills-lock.json
+apps/web/src/routeTree.gen.ts

@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "lint": "eslint",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10",
+    "@shadcn/lint": "^0.1.5",
     "@tailwindcss/vite": "^4",
     "@turbo/gen": "^2.10.12",
     "@types/node": "^24",
