@@ -1,5 +1,5 @@
 ---
-name: verify-vite-monorepo
+name: verify-mercury
 description: Launch and drive the real Mercury app (React web UI at / and /todos, backed by the Hono /api and Postgres) in an isolated throwaway stack, then capture screenshots, ARIA snapshots, network, and DB evidence. Use to prove a web or API change works end to end in the running app, not just in Vitest.
 ---
 
@@ -9,17 +9,17 @@ The user-facing surface is the **web UI** (`apps/web`, Vite + React + TanStack R
 
 Every run is isolated. `up.sh` creates a fresh Postgres 17 data dir, applies the repo's Drizzle migrations, and starts the API (`tsx watch`) and Vite on free ports. It never touches the `docker compose` database, `apps/api/.env`, or ports 3000/5173/5432. Concurrent runs don't collide. Never drive a server you didn't start with `up.sh`, such as the user's `pnpm dev`.
 
-All helpers live in `.claude/skills/verify-vite-monorepo/scripts/`. The examples below assume `S=.claude/skills/verify-vite-monorepo/scripts`, run from the repo root.
+All helpers live in `.claude/skills/verify-mercury/scripts/`. The examples below assume `S=.claude/skills/verify-mercury/scripts`, run from the repo root.
 
 ## Launch
 
 ```bash
-S=.claude/skills/verify-vite-monorepo/scripts
+S=.claude/skills/verify-mercury/scripts
 eval "$($S/up.sh)"        # prints `export VERIFY_RUN=<run dir>`; progress goes to stderr
 ```
 
 - **Ready** means `up.sh` exits 0 after printing `ready: web http://127.0.0.1:<port> ...`. It waits until `GET /api/health` answers on the API port, `/` answers on the web port, and `/api/health` answers through the web proxy (up to 60s each).
-- **First run** installs the Postgres binaries (`embedded-postgres@17.10.0-beta.17`, about 30 MB) into `~/.cache/verify-vite-monorepo/pg17`. If `node_modules` is missing, it also runs `pnpm install --frozen-lockfile`. Docker is not needed.
+- **First run** installs the Postgres binaries (`embedded-postgres@17.10.0-beta.17`, about 30 MB) into `~/.cache/verify-mercury/pg17`. If `node_modules` is missing, it also runs `pnpm install --frozen-lockfile`. Docker is not needed.
 - **On failure** `up.sh` tears down whatever it had started and names the logs dir. Read `$VERIFY_RUN/logs/{initdb,postgres,migrate,api,web}.log`.
 - `$VERIFY_RUN/state.env` holds `WEB_URL`, `API_URL`, `DATABASE_URL`, the ports, `API_PGID`, `WEB_PGID`, and `GIT_HEAD`. Run `source "$VERIFY_RUN/state.env"` to use them.
 - Both dev servers hot-reload source edits under `apps/`. Restart the run (`down.sh`, then `up.sh`) after changing the schema, migrations, dependencies, or `vite.config.ts`.
@@ -110,7 +110,7 @@ $S/down.sh                # uses $VERIFY_RUN; or pass the run dir. Safe to run t
 
 `down.sh` kills only the process groups recorded in `state.env` and stops that run's Postgres with `pg_ctl`. It then deletes `$VERIFY_RUN/scratch`, which holds the DB data, and writes a `DOWN` marker.
 
-It **keeps** `$VERIFY_RUN/evidence/` and `$VERIFY_RUN/logs/`. Runs live under `~/.local/state/verify-vite-monorepo/runs/<run-id>/`. Override the location with `VERIFY_STATE_ROOT`.
+It **keeps** `$VERIFY_RUN/evidence/` and `$VERIFY_RUN/logs/`. Runs live under `~/.local/state/verify-mercury/runs/<run-id>/`. Override the location with `VERIFY_STATE_ROOT`.
 
 Never `pkill node`, `pkill vite`, or kill by port. The user may have their own dev servers running. Run `down.sh` after failed attempts too.
 
