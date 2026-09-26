@@ -51,3 +51,5 @@ jobs:
       - run: cli/scripts/smoke.sh
       - run: npm publish --provenance --access public
         working-directory: cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
