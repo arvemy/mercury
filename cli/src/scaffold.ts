@@ -63,6 +63,15 @@ export function scaffold({
     JSON.stringify({ ...pkg, name: projectName }, null, 2) + "\n"
   )
 
+  const indexHtml = path.join(targetDir, "apps/web/index.html")
+  if (fs.existsSync(indexHtml)) {
+    const html = fs.readFileSync(indexHtml, "utf8")
+    fs.writeFileSync(
+      indexHtml,
+      html.replace(/<title>.*<\/title>/, `<title>${projectName}</title>`)
+    )
+  }
+
   const envExample = path.join(targetDir, "apps/api/.env.example")
   if (fs.existsSync(envExample)) {
     fs.copyFileSync(envExample, path.join(targetDir, "apps/api/.env"))
