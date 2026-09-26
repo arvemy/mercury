@@ -49,6 +49,10 @@ describe("scaffold", () => {
     fs.writeFileSync(path.join(templateDir, "_gitignore"), "node_modules\n")
     fs.writeFileSync(path.join(templateDir, "_npmrc"), "")
     fs.writeFileSync(
+      path.join(templateDir, "README.md"),
+      "# Mercury app\n\nCreated with Mercury.\n"
+    )
+    fs.writeFileSync(
       path.join(templateDir, "package.json"),
       JSON.stringify({ name: "mercury", private: true })
     )
@@ -71,9 +75,13 @@ describe("scaffold", () => {
       ".claude",
       ".gitignore",
       ".npmrc",
+      "README.md",
       "apps",
       "package.json",
     ])
+    expect(fs.readFileSync(path.join(targetDir, "README.md"), "utf8")).toBe(
+      "# my-app\n\nCreated with Mercury.\n"
+    )
     expect(fs.readFileSync(path.join(targetDir, ".gitignore"), "utf8")).toBe(
       "node_modules\n"
     )
