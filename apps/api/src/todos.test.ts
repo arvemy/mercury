@@ -53,6 +53,25 @@ describe.skipIf(!dbUp)("todos", () => {
     expect(await get.json()).toEqual([created])
   })
 
+  it("POST /api/todos stores a trimmed title", async () => {
+    const res = await app.request("/api/todos", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "  Buy milk  " }),
+    })
+    expect(res.status).toBe(201)
+    expect(await res.json()).toMatchObject({ title: "Buy milk" })
+  })
+
+  it("POST /api/todos with a whitespace-only title is 400", async () => {
+    const res = await app.request("/api/todos", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "   " }),
+    })
+    expect(res.status).toBe(400)
+  })
+
   it("POST /api/todos with empty title is 400", async () => {
     const res = await app.request("/api/todos", {
       method: "POST",
