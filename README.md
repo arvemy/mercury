@@ -61,7 +61,7 @@ Routing is file-based under `apps/web/src/routes`. The TanStack Router Vite plug
 
 ## Database
 
-The API uses Drizzle ORM on PostgreSQL. `docker compose up -d db` starts a local Postgres 17 that matches `apps/api/.env`.
+The API uses Drizzle ORM on PostgreSQL. `docker compose up -d db` starts a local Postgres 18 that matches `apps/api/.env`.
 
 The schema lives in `apps/api/src/db/schema.ts`. After changing it, run `pnpm db:generate` to write a migration, then `pnpm db:migrate` to apply it.
 
