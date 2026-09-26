@@ -8,13 +8,15 @@ export const EXCLUDED = [
   ".agents/skills/verify-create-mercury/",
   ".agents/skills/verify-mercury/",
   ".claude/",
-  ".github/workflows/create-mercury.yml",
-  ".github/workflows/release.yml",
   "cli/",
   "LICENSE",
 ]
 
+// Everything else in .github/ is for Mercury's own repository.
+const SHIPPED_GITHUB_FILES = [".github/workflows/ci.yml"]
+
 export function isTemplateFile(file: string) {
+  if (file.startsWith(".github/")) return SHIPPED_GITHUB_FILES.includes(file)
   return !EXCLUDED.some((excluded) =>
     excluded.endsWith("/") ? file.startsWith(excluded) : file === excluded
   )
