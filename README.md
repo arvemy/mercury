@@ -1,6 +1,20 @@
 # Mercury
 
+[![npm](https://img.shields.io/npm/v/create-mercury?label=create-mercury)](https://www.npmjs.com/package/create-mercury)
+[![CI](https://github.com/arvemy/mercury/actions/workflows/ci.yml/badge.svg)](https://github.com/arvemy/mercury/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 An opinionated TypeScript full-stack starter. React, Hono, and PostgreSQL, powered by pnpm and Turborepo.
+
+```sh
+pnpm create mercury my-app
+```
+
+One command gives you a working monorepo with a typed API, a database, a UI kit, tests, CI, and agent skills. There are no options to choose from. Every project starts from the same tested stack.
+
+## Quick start
+
+You need Node.js 22.22, 24.15, or 26 or later, pnpm 10, and Docker for the local database.
 
 ```sh
 pnpm create mercury my-app
@@ -10,71 +24,52 @@ pnpm db:migrate
 pnpm dev
 ```
 
-The web app runs at http://localhost:5173 and the API at http://localhost:3000.
+The web app runs at http://localhost:5173 and the API at http://localhost:3000. Leave out `my-app` to be asked for a name.
 
-## The stack
+`create-mercury` copies the template, names the project, writes `apps/api/.env`, installs dependencies, and makes the first commit on `main`.
 
-- `apps/web` is React 19 on Vite, with TanStack Router for file-based routing and TanStack Query for data fetching.
-- `apps/api` is Hono on Node, with Drizzle ORM on PostgreSQL and zod validation.
-- `packages/ui` holds shared shadcn/ui components and the Tailwind CSS v4 theme.
-- Vitest, ESLint, Prettier, a husky pre-commit hook, and a GitHub Actions workflow are set up.
+## What you get
 
-The todos page is a worked example of the full path from schema to screen. Delete it once you have your own.
+| Layer    | Tools                                                                                        |
+| -------- | -------------------------------------------------------------------------------------------- |
+| Web      | React 19, Vite, TanStack Router with file-based routes, TanStack Query                       |
+| API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app |
+| Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                  |
+| UI       | shadcn/ui components in a shared package, Tailwind CSS v4, a `d` key dark-mode toggle        |
+| Quality  | TypeScript 7, Vitest, ESLint, Prettier, a husky and lint-staged pre-commit hook              |
+| Build    | pnpm workspaces and Turborepo                                                                |
+| CI       | A GitHub Actions workflow that lints, typechecks, builds, migrates, and tests                |
+| Agents   | Skills for the stack in `.agents/skills`, linked for Claude Code                             |
 
-## Agent skills
+A todos page shows the full path from schema to migration to API route to typed client to page. Delete it once you have your own.
 
-Coding agents get project skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. They cover shadcn/ui, Turborepo, React composition and performance, React view transitions, web design guidelines, web app testing, Conventional Commits, and Semantic Versioning. `skills-lock.json` records the sources of the ones installed with `npx skills`, so `npx skills update` refreshes them.
+## Project layout
 
-## Scripts
-
-Run these from the project root. Turborepo runs each one across every package.
-
-| Script             | What it does                                |
-| ------------------ | ------------------------------------------- |
-| `pnpm dev`         | Start the web app and the API in watch mode |
-| `pnpm build`       | Build every package                         |
-| `pnpm test`        | Run the Vitest suites                       |
-| `pnpm lint`        | Lint every package                          |
-| `pnpm typecheck`   | Typecheck every package                     |
-| `pnpm format`      | Format the repo with Prettier               |
-| `pnpm db:generate` | Write a migration from schema changes       |
-| `pnpm db:migrate`  | Apply migrations                            |
-| `pnpm db:studio`   | Open Drizzle Studio                         |
-
-## Backend
-
-The API lives in `apps/api` (`@workspace/api`). `pnpm dev` starts it alongside the web app, and Vite proxies `/api` to it. Set `PORT` to change its port (default `3000`).
-
-The web app calls it through a typed client.
-
-```ts
-import { api } from "@/lib/api"
-
-const res = await api.api.health.$get()
+```text
+my-app/
+├── apps/
+│   ├── api/        Hono API, Drizzle schema and migrations
+│   └── web/        React app, routes, and queries
+├── packages/
+│   └── ui/         shadcn/ui components and the Tailwind theme
+├── .agents/skills/ Skills for coding agents
+└── docker-compose.yml
 ```
 
-`src/lib/api.ts` builds that client from `AppType`, exported by `apps/api/src/app.ts`, so request and response types flow end to end.
+The generated project has its own README with scripts and how each part works.
 
-## Frontend
+## Work on Mercury
 
-Routing is file-based under `apps/web/src/routes`. The TanStack Router Vite plugin generates `src/routeTree.gen.ts` from those files. Keep it committed. Data fetching goes through TanStack Query, with `queryOptions` definitions in `src/lib/queries.ts` shared by route loaders and components.
+This repository is the template. The root is a working Mercury app, and `cli/` holds `create-mercury`, which packs a snapshot of the root.
 
-## Database
+- `pnpm dev`, `pnpm test`, and the other root scripts run the template app.
+- `cli/scripts/smoke.sh` packs the CLI, creates a project from the tarball, and runs its migrations, lint, typecheck, build, and tests. Set `DATABASE_URL` first.
+- `cli/scripts/snapshot.ts` decides what ships. Repo-only files go in its `EXCLUDED` list.
+- `cli/project-readme.md` is the README that generated projects get.
+- The `verify-mercury` and `verify-create-mercury` skills drive the real app and the real CLI for end-to-end checks.
 
-The API uses Drizzle ORM on PostgreSQL. `docker compose up -d db` starts a local Postgres 18 that matches `apps/api/.env`.
+Releases publish from a `v*` tag through `.github/workflows/release.yml` with npm trusted publishing. The tag must match the version in `cli/package.json`.
 
-The schema lives in `apps/api/src/db/schema.ts`. After changing it, run `pnpm db:generate` to write a migration, then `pnpm db:migrate` to apply it.
+## License
 
-## UI components
-
-Add shadcn/ui components from the project root.
-
-```sh
-pnpm dlx shadcn@latest add button -c apps/web
-```
-
-They land in `packages/ui/src/components`. Import them from the `ui` package.
-
-```tsx
-import { Button } from "@workspace/ui/components/button"
-```
+[MIT](LICENSE)
