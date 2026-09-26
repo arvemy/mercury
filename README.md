@@ -63,7 +63,7 @@ This repository is the template. The root is a working Mercury app, and `cli/` h
 - `pnpm dev`, `pnpm test`, and the other root scripts run the template app.
 - `cli/scripts/next-steps.sh` creates a project and runs the next steps the CLI prints, then checks that the app answers. It needs Docker.
 - `cli/scripts/smoke.sh` packs the CLI, creates a project from the tarball, and runs its migrations, lint, typecheck, build, and tests. Set `DATABASE_URL` first.
-- `cli/scripts/snapshot.ts` decides what ships. Repo-only files go in its `EXCLUDED` list.
+- `cli/scripts/snapshot.ts` decides what ships. Repo-only files go in its `EXCLUDED` list. From `.github/`, only `workflows/ci.yml` ships.
 - `cli/project-readme.md` is the README that generated projects get.
 - The `verify-mercury` and `verify-create-mercury` skills drive the real app and the real CLI for end-to-end checks.
 

@@ -1,0 +1,35 @@
+name: Bug report
+description: Something in create-mercury or a generated project doesn't work.
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. Include error output.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. pnpm create mercury my-app
+        2. cd my-app
+        3. pnpm dev
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: create-mercury version
+      description: The version you ran, such as 0.1.0, or the commit of main.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Node.js version (node -v), pnpm version (pnpm -v), and Docker version if the database is involved.
+    validations:
+      required: true
