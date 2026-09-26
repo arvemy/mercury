@@ -92,4 +92,21 @@ describe("/todos", () => {
     expect(await screen.findByText("New")).toBeInTheDocument()
     expect(screen.getByLabelText("New todo")).toHaveValue("")
   })
+
+  it("shows an error and keeps the input when adding fails", async () => {
+    stubFetch(async (_input, init) =>
+      init?.method === "POST"
+        ? Response.json({}, { status: 500 })
+        : Response.json([])
+    )
+    renderRoute("/todos")
+    fireEvent.change(await screen.findByLabelText("New todo"), {
+      target: { value: "New" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Add" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn't add the todo. Try again."
+    )
+    expect(screen.getByLabelText("New todo")).toHaveValue("New")
+  })
 })

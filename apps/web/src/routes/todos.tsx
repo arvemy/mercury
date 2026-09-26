@@ -65,6 +65,11 @@ function Todos() {
           Add
         </Button>
       </form>
+      {addTodo.isError && (
+        <p role="alert" className="text-destructive">
+          Couldn't add the todo. Try again.
+        </p>
+      )}
     </div>
   )
 }

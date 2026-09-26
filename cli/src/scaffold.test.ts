@@ -34,6 +34,11 @@ describe("scaffold", () => {
     root = fs.mkdtempSync(path.join(os.tmpdir(), "create-mercury-"))
     templateDir = path.join(root, "template")
     fs.mkdirSync(path.join(templateDir, "apps/api"), { recursive: true })
+    fs.mkdirSync(path.join(templateDir, "apps/web"), { recursive: true })
+    fs.writeFileSync(
+      path.join(templateDir, "apps/web/index.html"),
+      "<head>\n    <title>Mercury</title>\n</head>\n"
+    )
     fs.writeFileSync(path.join(templateDir, "_gitignore"), "node_modules\n")
     fs.writeFileSync(path.join(templateDir, "_npmrc"), "")
     fs.writeFileSync(
@@ -69,6 +74,9 @@ describe("scaffold", () => {
     expect(fs.readFileSync(path.join(targetDir, "apps/api/.env"), "utf8")).toBe(
       "PORT=3000\n"
     )
+    expect(
+      fs.readFileSync(path.join(targetDir, "apps/web/index.html"), "utf8")
+    ).toBe("<head>\n    <title>my-app</title>\n</head>\n")
   })
 
   it("refuses a non-empty target without writing", () => {

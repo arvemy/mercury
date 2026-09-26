@@ -9,5 +9,5 @@ export const todos = pgTable("todos", {
 })
 
 export const insertTodoSchema = createInsertSchema(todos, {
-  title: (schema) => schema.min(1),
+  title: (schema) => schema.trim().min(1),
 }).pick({ title: true })

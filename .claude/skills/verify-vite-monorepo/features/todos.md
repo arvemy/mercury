@@ -34,8 +34,8 @@ Preconditions:
 
 - `expect-text` is an exact, full-text match. List items render the title alone, and the text `done` appears as a separate span only when `completed` is true.
 - The UI cannot mark a todo complete, and `POST /api/todos` ignores `completed`: the API accepts only `title`. Every todo created here shows no `done` label.
-- Blank rejection happens only in the browser. The API accepts a whitespace-only title such as `"   "`.
-- A failed POST shows no error in the UI.
+- The API also trims titles and rejects a whitespace-only title with 400, so the browser and the API agree.
+- A failed POST shows `Couldn't add the todo. Try again.` as an alert under the form and keeps the typed title in the input.
 - There is no delete in the UI or the API. To get back to an empty list, run `down.sh` and then `up.sh`.
 - `Add` stays disabled until the POST and the list refetch after it both finish. Use `wait-response` rather than asserting the disabled state, and follow it with an `expect-text` for the new item before the next submit.
 - The TanStack Router and Query devtools buttons sit in the bottom corners in dev. They appear in ARIA snapshots and screenshots. Ignore them.
