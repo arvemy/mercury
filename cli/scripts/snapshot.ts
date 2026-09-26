@@ -53,6 +53,10 @@ export function snapshot(repoRoot: string, templateDir: string) {
     stdio: "inherit",
   })
 
+  fs.copyFileSync(
+    path.join(repoRoot, "cli/project-readme.md"),
+    path.join(templateDir, "README.md")
+  )
   renameDotfiles(templateDir, "pack")
 }
 

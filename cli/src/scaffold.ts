@@ -89,6 +89,12 @@ export function scaffold({
     )
   }
 
+  const readme = path.join(targetDir, "README.md")
+  if (fs.existsSync(readme)) {
+    const text = fs.readFileSync(readme, "utf8")
+    fs.writeFileSync(readme, text.replace(/^# .*$/m, `# ${projectName}`))
+  }
+
   const envExample = path.join(targetDir, "apps/api/.env.example")
   if (fs.existsSync(envExample)) {
     fs.copyFileSync(envExample, path.join(targetDir, "apps/api/.env"))

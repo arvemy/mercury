@@ -57,6 +57,9 @@ describe("snapshot", () => {
     const files = listFiles(first)
     expect(listFiles(second)).toEqual(files)
     expect(files).toContain("_gitignore")
+    expect(fs.readFileSync(path.join(first, "README.md"), "utf8")).toBe(
+      fs.readFileSync(path.join(repoRoot, "cli/project-readme.md"), "utf8")
+    )
     expect(files).not.toContain(".gitignore")
     expect(files.some((file) => file.startsWith("cli/"))).toBe(false)
     expect(
