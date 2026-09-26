@@ -19,12 +19,10 @@ You need Node.js 22.22, 24.15, or 26 or later, pnpm 10, and Docker for the local
 ```sh
 pnpm create mercury my-app
 cd my-app
-docker compose up -d db
-pnpm db:migrate
 pnpm dev
 ```
 
-The web app runs at http://localhost:5173 and the API at http://localhost:3000. Leave out `my-app` to be asked for a name.
+`pnpm dev` starts PostgreSQL in Docker, applies migrations, and runs the web app at http://localhost:5173 and the API at http://localhost:3000. Leave out `my-app` to be asked for a name.
 
 `create-mercury` copies the template, names the project, writes `apps/api/.env`, installs dependencies, and makes the first commit on `main`.
 
@@ -63,6 +61,7 @@ The generated project has its own README with scripts and how each part works.
 This repository is the template. The root is a working Mercury app, and `cli/` holds `create-mercury`, which packs a snapshot of the root.
 
 - `pnpm dev`, `pnpm test`, and the other root scripts run the template app.
+- `cli/scripts/next-steps.sh` creates a project and runs the next steps the CLI prints, then checks that the app answers. It needs Docker.
 - `cli/scripts/smoke.sh` packs the CLI, creates a project from the tarball, and runs its migrations, lint, typecheck, build, and tests. Set `DATABASE_URL` first.
 - `cli/scripts/snapshot.ts` decides what ships. Repo-only files go in its `EXCLUDED` list.
 - `cli/project-readme.md` is the README that generated projects get.

@@ -26,9 +26,9 @@ You need Node.js 22.22, 24.15, or 26 or later, pnpm 10, and Docker for the local
 
 ```sh
 cd my-app
-docker compose up -d db
-pnpm db:migrate
 pnpm dev
 ```
+
+`pnpm dev` starts PostgreSQL in Docker, applies migrations, and runs the web app and the API.
 
 See the [Mercury README](https://github.com/arvemy/mercury#readme) for what the project includes.

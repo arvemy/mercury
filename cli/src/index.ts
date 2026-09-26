@@ -88,8 +88,6 @@ async function main() {
 Done. Next steps:
 
   cd ${projectName}
-  docker compose up -d db
-  pnpm db:migrate
   pnpm dev
 `)
 }

@@ -59,7 +59,7 @@ $S/drive.py --help                     # full step list
 These strings are stable in this CLI (`cli/src/index.ts`, `cli/src/scaffold.ts`):
 
 - the prompt `Project name: `
-- the success header `Done. Next steps:`, followed by `cd <name>`, `docker compose up -d db`, `pnpm db:migrate`, and `pnpm dev`
+- the success header `Done. Next steps:`, followed by `cd <name>` and `pnpm dev`
 - the name rule `Project name must be lowercase and use only letters, digits, and - . _ ~`
 - the non-empty refusal `<absolute path> already exists and is not empty.`
 - the no-TTY usage line `Usage: pnpm create mercury <project-name>`
