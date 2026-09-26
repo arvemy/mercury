@@ -23,7 +23,7 @@ The todos page is a worked example of the full path from schema to screen. Delet
 
 ## Agent skills
 
-Coding agents get project skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. They cover shadcn/ui, Turborepo, React composition and performance, React view transitions, web design guidelines, and web app testing. `skills-lock.json` records their sources, so `npx skills update` refreshes them.
+Coding agents get project skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. They cover shadcn/ui, Turborepo, React composition and performance, React view transitions, web design guidelines, web app testing, Conventional Commits, and Semantic Versioning. `skills-lock.json` records the sources of the ones installed with `npx skills`, so `npx skills update` refreshes them.
 
 ## Scripts
 
