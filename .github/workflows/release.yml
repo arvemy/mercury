@@ -1,0 +1,53 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
+      TURBO_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the tag matches the CLI version
+        run: |
+          version=$(node -p "require('./cli/package.json').version")
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match cli/package.json version $version"
+            exit 1
+          fi
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: npm install -g npm@^11.5.1
+      - run: pnpm install --frozen-lockfile
+      - run: |
+          git config --global user.name "create-mercury smoke"
+          git config --global user.email "smoke@create-mercury.invalid"
+      - run: cli/scripts/smoke.sh
+      - run: npm publish --provenance --access public
+        working-directory: cli

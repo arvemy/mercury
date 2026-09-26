@@ -10,6 +10,7 @@ export const EXCLUDED = [
   ".github/workflows/create-mercury.yml",
   ".github/workflows/release.yml",
   "cli/",
+  "LICENSE",
   "skills-lock.json",
 ]
 

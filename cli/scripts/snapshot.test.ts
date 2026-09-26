@@ -26,6 +26,7 @@ describe("isTemplateFile", () => {
     expect(isTemplateFile(".claude/skills/x/SKILL.md")).toBe(false)
     expect(isTemplateFile(".github/workflows/release.yml")).toBe(false)
     expect(isTemplateFile("skills-lock.json")).toBe(false)
+    expect(isTemplateFile("LICENSE")).toBe(false)
   })
 })
 
