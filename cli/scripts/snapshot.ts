@@ -10,6 +10,7 @@ export const EXCLUDED = [
   ".claude/",
   "cli/",
   "LICENSE",
+  "NOTICE",
 ]
 
 // Everything else in .github/ is for Mercury's own repository.

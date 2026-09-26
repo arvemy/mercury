@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/create-mercury?label=create-mercury)](https://www.npmjs.com/package/create-mercury)
 [![CI](https://github.com/arvemy/mercury/actions/workflows/ci.yml/badge.svg)](https://github.com/arvemy/mercury/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
 An opinionated TypeScript full-stack starter. React, Hono, and PostgreSQL, powered by pnpm and Turborepo.
 
@@ -71,4 +71,4 @@ Releases publish from a `v*` tag through `.github/workflows/release.yml` with np
 
 ## License
 
-[MIT](LICENSE)
+[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for the copyright notice.

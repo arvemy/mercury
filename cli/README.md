@@ -1,7 +1,7 @@
 # create-mercury
 
 [![npm](https://img.shields.io/npm/v/create-mercury)](https://www.npmjs.com/package/create-mercury)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/arvemy/mercury/blob/main/LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](https://github.com/arvemy/mercury/blob/main/LICENSE)
 
 Create a [Mercury](https://github.com/arvemy/mercury) project. Mercury is an opinionated TypeScript full-stack starter with React, Hono, and PostgreSQL, powered by pnpm and Turborepo.
 
