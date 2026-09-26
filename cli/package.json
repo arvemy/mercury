@@ -1,0 +1,33 @@
+{
+  "name": "create-mercury",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "create-mercury": "dist/src/index.js"
+  },
+  "files": [
+    "dist/src/index.js",
+    "dist/src/scaffold.js",
+    "template"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "lint": "eslint",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "snapshot": "node dist/scripts/snapshot.js",
+    "prepack": "tsc -b && pnpm snapshot"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "@types/node": "^24",
+    "eslint": "^10",
+    "globals": "^17",
+    "typescript": "~6",
+    "typescript-eslint": "^8",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
