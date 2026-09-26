@@ -21,6 +21,10 @@ The web app runs at http://localhost:5173 and the API at http://localhost:3000.
 
 The todos page is a worked example of the full path from schema to screen. Delete it once you have your own.
 
+## Agent skills
+
+Coding agents get project skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. They cover shadcn/ui, Turborepo, React composition and performance, React view transitions, web design guidelines, and web app testing. `skills-lock.json` records their sources, so `npx skills update` refreshes them.
+
 ## Scripts
 
 Run these from the project root. Turborepo runs each one across every package.

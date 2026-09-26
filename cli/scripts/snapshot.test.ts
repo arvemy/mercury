@@ -19,13 +19,18 @@ describe("isTemplateFile", () => {
   it("keeps app files and the user-facing CI workflow", () => {
     expect(isTemplateFile("apps/api/src/app.ts")).toBe(true)
     expect(isTemplateFile(".github/workflows/ci.yml")).toBe(true)
+    expect(isTemplateFile(".agents/skills/shadcn/SKILL.md")).toBe(true)
+    expect(isTemplateFile("skills-lock.json")).toBe(true)
   })
 
   it("drops repo-only files", () => {
     expect(isTemplateFile("cli/src/index.ts")).toBe(false)
     expect(isTemplateFile(".claude/skills/x/SKILL.md")).toBe(false)
     expect(isTemplateFile(".github/workflows/release.yml")).toBe(false)
-    expect(isTemplateFile("skills-lock.json")).toBe(false)
+    expect(isTemplateFile(".agents/skills/verify-mercury/SKILL.md")).toBe(false)
+    expect(
+      isTemplateFile(".agents/skills/verify-create-mercury/SKILL.md")
+    ).toBe(false)
     expect(isTemplateFile("LICENSE")).toBe(false)
   })
 })
