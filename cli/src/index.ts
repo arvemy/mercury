@@ -52,7 +52,11 @@ async function main() {
   console.log(`\nCreated ${projectName} in ${targetDir}\n`)
 
   // git init runs first so the template's husky prepare script finds a repo.
-  const hasGit = run("git", ["init", "--quiet"], targetDir)
+  const hasGit = run(
+    "git",
+    ["init", "--quiet", "--initial-branch=main"],
+    targetDir
+  )
   if (!hasGit) console.warn("git init failed. Skipping the initial commit.")
 
   if (!run("pnpm", ["install"], targetDir)) {
