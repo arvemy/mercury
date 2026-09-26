@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10",
-    "@types/node": "^24",
+    "@types/node": "^26.6.3",
     "eslint": "^10.11.0",
     "globals": "^17",
     "typescript": "~6",
