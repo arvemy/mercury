@@ -9,3 +9,4 @@ apps/api/drizzle/
 .claude/
 skills-lock.json
 apps/web/src/routeTree.gen.ts
+cli/template/
