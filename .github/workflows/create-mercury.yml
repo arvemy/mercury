@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   smoke:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:18-alpine
@@ -43,7 +43,7 @@ jobs:
       - run: cli/scripts/smoke.sh
 
   compose-db:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Start the template's database
@@ -61,7 +61,7 @@ jobs:
         run: docker compose down -v
 
   next-steps:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     env:
       TURBO_TELEMETRY_DISABLED: 1
     steps:

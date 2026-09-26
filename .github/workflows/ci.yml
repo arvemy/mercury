@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:18-alpine
