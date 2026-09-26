@@ -7,12 +7,12 @@ A full-stack TypeScript app created with [Mercury](https://github.com/arvemy/mer
 You need Node.js 22.22, 24.15, or 26 or later, pnpm 10, and Docker for the local database.
 
 ```sh
-docker compose up -d db
-pnpm db:migrate
 pnpm dev
 ```
 
-The web app runs at http://localhost:5173 and the API at http://localhost:3000.
+This starts PostgreSQL in Docker, applies migrations, and runs the web app at http://localhost:5173 and the API at http://localhost:3000. Each of those steps does nothing when it is already done, so run `pnpm dev` every time.
+
+To use your own PostgreSQL instead of Docker, set `DATABASE_URL` in `apps/api/.env`, run `pnpm db:migrate`, then run `pnpm dev:apps`. It starts only the web app and the API.
 
 The todos page is a worked example of the full path from schema to screen. Delete it once you have your own.
 
@@ -30,17 +30,18 @@ Vitest, ESLint, Prettier, a husky pre-commit hook, and a GitHub Actions workflow
 
 Run these from the project root. Turborepo runs each one across every package.
 
-| Script             | What it does                                |
-| ------------------ | ------------------------------------------- |
-| `pnpm dev`         | Start the web app and the API in watch mode |
-| `pnpm build`       | Build every package                         |
-| `pnpm test`        | Run the Vitest suites                       |
-| `pnpm lint`        | Lint every package                          |
-| `pnpm typecheck`   | Typecheck every package                     |
-| `pnpm format`      | Format the repo with Prettier               |
-| `pnpm db:generate` | Write a migration from schema changes       |
-| `pnpm db:migrate`  | Apply migrations                            |
-| `pnpm db:studio`   | Open Drizzle Studio                         |
+| Script             | What it does                                                                  |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `pnpm dev`         | Start the database, migrate, then start the web app and the API in watch mode |
+| `pnpm dev:apps`    | Start only the web app and the API in watch mode                              |
+| `pnpm build`       | Build every package                                                           |
+| `pnpm test`        | Run the Vitest suites                                                         |
+| `pnpm lint`        | Lint every package                                                            |
+| `pnpm typecheck`   | Typecheck every package                                                       |
+| `pnpm format`      | Format the repo with Prettier                                                 |
+| `pnpm db:generate` | Write a migration from schema changes                                         |
+| `pnpm db:migrate`  | Apply migrations                                                              |
+| `pnpm db:studio`   | Open Drizzle Studio                                                           |
 
 ## Backend
 
@@ -62,7 +63,7 @@ Routing is file-based under `apps/web/src/routes`. The TanStack Router Vite plug
 
 ## Database
 
-`docker compose up -d db` starts PostgreSQL 18 with the credentials in `apps/api/.env`.
+`pnpm dev` starts PostgreSQL 18 with Docker Compose, using the credentials in `apps/api/.env`. To start only the database, run `docker compose up -d db`.
 
 The schema lives in `apps/api/src/db/schema.ts`. After changing it, run `pnpm db:generate` to write a migration, then `pnpm db:migrate` to apply it.
 
