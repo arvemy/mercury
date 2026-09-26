@@ -36,6 +36,7 @@ describe("isTemplateFile", () => {
       isTemplateFile(".agents/skills/verify-create-mercury/SKILL.md")
     ).toBe(false)
     expect(isTemplateFile("LICENSE")).toBe(false)
+    expect(isTemplateFile("NOTICE")).toBe(false)
   })
 })
 
