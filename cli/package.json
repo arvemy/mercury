@@ -1,6 +1,25 @@
 {
   "name": "create-mercury",
   "version": "0.1.0",
+  "description": "Create a Mercury project. An opinionated TypeScript full-stack starter with React, Hono, and PostgreSQL.",
+  "keywords": [
+    "create",
+    "starter",
+    "template",
+    "react",
+    "hono",
+    "postgresql",
+    "drizzle",
+    "turborepo",
+    "pnpm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arvemy/mercury.git",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/arvemy/mercury#readme",
   "type": "module",
   "bin": {
     "create-mercury": "dist/src/index.js"

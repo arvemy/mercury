@@ -1,30 +1,47 @@
-# shadcn/ui monorepo template
+# Mercury
 
-This is a Vite monorepo template with shadcn/ui.
+An opinionated TypeScript full-stack starter. React, Hono, and PostgreSQL, powered by pnpm and Turborepo.
 
-## Adding components
-
-To add components to your app, run the following command at the root of your `web` app:
-
-```bash
-pnpm dlx shadcn@latest add button -c apps/web
+```sh
+pnpm create mercury my-app
+cd my-app
+docker compose up -d db
+pnpm db:migrate
+pnpm dev
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+The web app runs at http://localhost:5173 and the API at http://localhost:3000.
 
-## Using components
+## The stack
 
-To use the components in your app, import them from the `ui` package.
+- `apps/web` is React 19 on Vite, with TanStack Router for file-based routing and TanStack Query for data fetching.
+- `apps/api` is Hono on Node, with Drizzle ORM on PostgreSQL and zod validation.
+- `packages/ui` holds shared shadcn/ui components and the Tailwind CSS v4 theme.
+- Vitest, ESLint, Prettier, a husky pre-commit hook, and a GitHub Actions workflow are set up.
 
-```tsx
-import { Button } from "@workspace/ui/components/button"
-```
+The todos page is a worked example of the full path from schema to screen. Delete it once you have your own.
 
-## Backend (Hono)
+## Scripts
 
-The API lives in `apps/api` (`@workspace/api`). `pnpm dev` starts it alongside the web app; Vite proxies `/api` to it. Set `PORT` to change its port (default `3000`).
+Run these from the project root. Turborepo runs each one across every package.
 
-The web app calls it through a typed client:
+| Script             | What it does                                |
+| ------------------ | ------------------------------------------- |
+| `pnpm dev`         | Start the web app and the API in watch mode |
+| `pnpm build`       | Build every package                         |
+| `pnpm test`        | Run the Vitest suites                       |
+| `pnpm lint`        | Lint every package                          |
+| `pnpm typecheck`   | Typecheck every package                     |
+| `pnpm format`      | Format the repo with Prettier               |
+| `pnpm db:generate` | Write a migration from schema changes       |
+| `pnpm db:migrate`  | Apply migrations                            |
+| `pnpm db:studio`   | Open Drizzle Studio                         |
+
+## Backend
+
+The API lives in `apps/api` (`@workspace/api`). `pnpm dev` starts it alongside the web app, and Vite proxies `/api` to it. Set `PORT` to change its port (default `3000`).
+
+The web app calls it through a typed client.
 
 ```ts
 import { api } from "@/lib/api"
@@ -32,19 +49,28 @@ import { api } from "@/lib/api"
 const res = await api.api.health.$get()
 ```
 
-`src/lib/api.ts` builds that client from `AppType`, exported by `apps/api/src/app.ts`.
+`src/lib/api.ts` builds that client from `AppType`, exported by `apps/api/src/app.ts`, so request and response types flow end to end.
 
-Routing is file-based under `apps/web/src/routes` (TanStack Router). The Vite plugin generates `src/routeTree.gen.ts` from those files; keep it committed. Data fetching goes through TanStack Query, with `queryOptions` definitions in `src/lib/queries.ts` shared by route loaders and components. The Hono `hc` client keeps request and response types end-to-end.
+## Frontend
 
-### Database
+Routing is file-based under `apps/web/src/routes`. The TanStack Router Vite plugin generates `src/routeTree.gen.ts` from those files. Keep it committed. Data fetching goes through TanStack Query, with `queryOptions` definitions in `src/lib/queries.ts` shared by route loaders and components.
 
-The API uses Drizzle ORM on PostgreSQL. To run it locally:
+## Database
 
-```sh
-docker compose up -d db
-cp apps/api/.env.example apps/api/.env
-pnpm db:migrate
-pnpm db:studio
-```
+The API uses Drizzle ORM on PostgreSQL. `docker compose up -d db` starts a local Postgres 17 that matches `apps/api/.env`.
 
 The schema lives in `apps/api/src/db/schema.ts`. After changing it, run `pnpm db:generate` to write a migration, then `pnpm db:migrate` to apply it.
+
+## UI components
+
+Add shadcn/ui components from the project root.
+
+```sh
+pnpm dlx shadcn@latest add button -c apps/web
+```
+
+They land in `packages/ui/src/components`. Import them from the `ui` package.
+
+```tsx
+import { Button } from "@workspace/ui/components/button"
+```
