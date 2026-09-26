@@ -2,9 +2,9 @@
 
 SKILL_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 REPO=$(git -C "$SKILL_DIR" rev-parse --show-toplevel)
-STATE_ROOT=${VERIFY_STATE_ROOT:-${XDG_STATE_HOME:-$HOME/.local/state}/verify-vite-monorepo}
+STATE_ROOT=${VERIFY_STATE_ROOT:-${XDG_STATE_HOME:-$HOME/.local/state}/verify-mercury}
 PG_VERSION=17.10.0-beta.17
-PG_CACHE=${VERIFY_PG_CACHE:-$HOME/.cache/verify-vite-monorepo/pg17}
+PG_CACHE=${VERIFY_PG_CACHE:-$HOME/.cache/verify-mercury/pg17}
 PG_BIN=$PG_CACHE/node_modules/@embedded-postgres/linux-x64/native/bin
 
 die() { echo "error: $*" >&2; exit 1; }
