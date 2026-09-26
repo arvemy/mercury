@@ -45,6 +45,22 @@ export function renameDotfiles(dir: string, direction: "pack" | "unpack") {
   }
 }
 
+// Claude Code reads skills from .claude/skills, other agents from .agents/skills.
+export function linkAgentSkills(dir: string) {
+  const skillsDir = path.join(dir, ".agents/skills")
+  if (!fs.existsSync(skillsDir)) return
+  const linksDir = path.join(dir, ".claude/skills")
+  fs.mkdirSync(linksDir, { recursive: true })
+  for (const name of fs.readdirSync(skillsDir)) {
+    const link = path.join(linksDir, name)
+    try {
+      fs.symlinkSync(path.join("../../.agents/skills", name), link, "dir")
+    } catch {
+      fs.cpSync(path.join(skillsDir, name), link, { recursive: true })
+    }
+  }
+}
+
 export function scaffold({
   projectName,
   targetDir,
@@ -55,6 +71,7 @@ export function scaffold({
   }
   fs.cpSync(templateDir, targetDir, { recursive: true })
   renameDotfiles(targetDir, "unpack")
+  linkAgentSkills(targetDir)
 
   const pkgPath = path.join(targetDir, "package.json")
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"))

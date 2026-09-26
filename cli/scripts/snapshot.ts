@@ -5,13 +5,13 @@ import { fileURLToPath } from "node:url"
 import { renameDotfiles } from "../src/scaffold.js"
 
 export const EXCLUDED = [
-  ".agents/",
+  ".agents/skills/verify-create-mercury/",
+  ".agents/skills/verify-mercury/",
   ".claude/",
   ".github/workflows/create-mercury.yml",
   ".github/workflows/release.yml",
   "cli/",
   "LICENSE",
-  "skills-lock.json",
 ]
 
 export function isTemplateFile(file: string) {

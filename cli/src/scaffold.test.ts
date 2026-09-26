@@ -35,6 +35,13 @@ describe("scaffold", () => {
     templateDir = path.join(root, "template")
     fs.mkdirSync(path.join(templateDir, "apps/api"), { recursive: true })
     fs.mkdirSync(path.join(templateDir, "apps/web"), { recursive: true })
+    fs.mkdirSync(path.join(templateDir, ".agents/skills/shadcn"), {
+      recursive: true,
+    })
+    fs.writeFileSync(
+      path.join(templateDir, ".agents/skills/shadcn/SKILL.md"),
+      "# shadcn\n"
+    )
     fs.writeFileSync(
       path.join(templateDir, "apps/web/index.html"),
       "<head>\n    <title>Mercury</title>\n</head>\n"
@@ -60,6 +67,8 @@ describe("scaffold", () => {
     })
 
     expect(fs.readdirSync(targetDir).sort()).toEqual([
+      ".agents",
+      ".claude",
       ".gitignore",
       ".npmrc",
       "apps",
@@ -77,6 +86,15 @@ describe("scaffold", () => {
     expect(
       fs.readFileSync(path.join(targetDir, "apps/web/index.html"), "utf8")
     ).toBe("<head>\n    <title>my-app</title>\n</head>\n")
+    expect(fs.readlinkSync(path.join(targetDir, ".claude/skills/shadcn"))).toBe(
+      "../../.agents/skills/shadcn"
+    )
+    expect(
+      fs.readFileSync(
+        path.join(targetDir, ".claude/skills/shadcn/SKILL.md"),
+        "utf8"
+      )
+    ).toBe("# shadcn\n")
   })
 
   it("refuses a non-empty target without writing", () => {
