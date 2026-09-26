@@ -9,12 +9,12 @@ The user-facing surface is the **web UI** (`apps/web`, Vite + React + TanStack R
 
 Every run is isolated. `up.sh` creates a fresh Postgres 17 data dir, applies the repo's Drizzle migrations, and starts the API (`tsx watch`) and Vite on free ports. It never touches the `docker compose` database, `apps/api/.env`, or ports 3000/5173/5432. Concurrent runs don't collide. Never drive a server you didn't start with `up.sh`, such as the user's `pnpm dev`.
 
-All helpers live in `.claude/skills/verify-mercury/scripts/`. The examples below assume `S=.claude/skills/verify-mercury/scripts`, run from the repo root.
+All helpers live in `.agents/skills/verify-mercury/scripts/`. The examples below assume `S=.agents/skills/verify-mercury/scripts`, run from the repo root.
 
 ## Launch
 
 ```bash
-S=.claude/skills/verify-mercury/scripts
+S=.agents/skills/verify-mercury/scripts
 eval "$($S/up.sh)"        # prints `export VERIFY_RUN=<run dir>`; progress goes to stderr
 ```
 
