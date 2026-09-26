@@ -6,7 +6,7 @@
 
 - `scaffold-named` creates the project with `package.json` name `my-app` and the browser tab title `my-app`.
 - `scaffold-files` restores `.gitignore` and `.npmrc` and writes `apps/api/.env` from `.env.example`.
-- `scaffold-git` leaves exactly one commit, `Initial commit from create-mercury`, and a clean working tree.
+- `scaffold-git` leaves exactly one commit, `Initial commit from create-mercury`, on branch `main` whatever the user's `init.defaultBranch` is, and a clean working tree.
 - `scaffold-install` installs dependencies, so `node_modules` exists and husky's hook dir is set up.
 - `scaffold-next-steps` prints `Done. Next steps:` with `cd my-app`, `docker compose up -d db`, `pnpm db:migrate`, and `pnpm dev`.
 
@@ -23,7 +23,7 @@ Preconditions:
 - **All sub-features in one drive.** Run:
 
   ```
-  $S/drive.py scaffold-named 'run my-app' 'wait "Done. Next steps:" 180' 'expect-exit 0' 'snap next-steps' 'expect-text "cd my-app"' 'expect-text "docker compose up -d db"' 'expect-text "pnpm db:migrate"' 'expect-text "pnpm dev"' 'expect-cmd "jq -r .name my-app/package.json" my-app' 'expect-cmd "grep -o \"<title>.*</title>\" my-app/apps/web/index.html" "<title>my-app</title>"' 'expect-path my-app/.gitignore' 'expect-path my-app/.npmrc' 'expect-no-path my-app/_gitignore' 'expect-cmd "cmp my-app/apps/api/.env my-app/apps/api/.env.example && echo same" same' 'expect-cmd "git -C my-app log --format=%s" "Initial commit from create-mercury"' 'expect-cmd "git -C my-app status --porcelain" ""' 'expect-path my-app/node_modules' 'expect-cmd "git -C my-app config core.hooksPath" ".husky/_"'
+  $S/drive.py scaffold-named 'run my-app' 'wait "Done. Next steps:" 180' 'expect-exit 0' 'snap next-steps' 'expect-text "cd my-app"' 'expect-text "docker compose up -d db"' 'expect-text "pnpm db:migrate"' 'expect-text "pnpm dev"' 'expect-cmd "jq -r .name my-app/package.json" my-app' 'expect-cmd "grep -o \"<title>.*</title>\" my-app/apps/web/index.html" "<title>my-app</title>"' 'expect-path my-app/.gitignore' 'expect-path my-app/.npmrc' 'expect-no-path my-app/_gitignore' 'expect-cmd "cmp my-app/apps/api/.env my-app/apps/api/.env.example && echo same" same' 'expect-cmd "git -C my-app log --format=%s" "Initial commit from create-mercury"' 'expect-cmd "git -C my-app branch --show-current" main' 'expect-cmd "git -C my-app status --porcelain" ""' 'expect-path my-app/node_modules' 'expect-cmd "git -C my-app config core.hooksPath" ".husky/_"'
   ```
 
   `steps.log` shows `exit 0` and each `expect-cmd` result. `01-next-steps.txt` shows the printed commands.

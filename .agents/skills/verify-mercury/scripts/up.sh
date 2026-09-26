@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start an isolated stack: throwaway Postgres 17 + migrated schema, API (tsx watch),
+# Start an isolated stack: throwaway Postgres 18 + migrated schema, API (tsx watch),
 # and Vite web dev server, all on free ports. Prints `export VERIFY_RUN=<dir>`.
 # Usage: up.sh
 set -euo pipefail
