@@ -59,3 +59,20 @@ jobs:
           test "$(docker compose exec -T db psql -U postgres -d app -tAc 'select count(*) from persist_check')" = 1
       - if: always()
         run: docker compose down -v
+
+  next-steps:
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: |
+          git config --global user.name "create-mercury smoke"
+          git config --global user.email "smoke@create-mercury.invalid"
+      - run: cli/scripts/next-steps.sh
