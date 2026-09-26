@@ -1,6 +1,6 @@
 # Mercury verification map
 
-This directory is the maintained source for verifying what users see and do in the Mercury app. Read this index before driving the app. Then follow the matching feature file as the recipe. Commands assume `S=.claude/skills/verify-vite-monorepo/scripts`, run from the repo root.
+This directory is the maintained source for verifying what users see and do in the Mercury app. Read this index before driving the app. Then follow the matching feature file as the recipe. Commands assume `S=.claude/skills/verify-mercury/scripts`, run from the repo root.
 
 ## Baseline preconditions
 
