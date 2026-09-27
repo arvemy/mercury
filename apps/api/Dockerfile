@@ -1,7 +1,7 @@
 # Build from the repository root: docker build -f apps/api/Dockerfile .
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 HUSKY=0
-RUN corepack enable
+RUN npm install -g corepack@0.36.0 && corepack enable
 WORKDIR /repo
 COPY package.json ./
 RUN corepack install
@@ -18,7 +18,7 @@ COPY --from=prune /repo/tsconfig.json ./tsconfig.json
 RUN pnpm --filter @workspace/api build \
   && pnpm --filter @workspace/api deploy --prod --legacy /app
 
-FROM node:24-alpine
+FROM node:26-alpine
 ENV NODE_ENV=production PORT=3000
 WORKDIR /app
 COPY --from=build /app/package.json ./
