@@ -49,7 +49,7 @@ Run these from the project root.
 
 The web app and the API each build into their own image.
 
-- `apps/api/Dockerfile` builds the API into a Node 24 image that runs as a non-root user. Its health check calls `/api/health`. The same image runs migrations with `node dist/migrate.js`.
+- `apps/api/Dockerfile` builds the API into a Node 26 image that runs as a non-root user. Its health check calls `/api/health`. The same image runs migrations with `node dist/migrate.js`.
 - `apps/web/Dockerfile` builds the web app and serves it with Caddy on port 8080 as a non-root user. Caddy proxies `/api` to the API, so the browser talks to one origin.
 
 To run the whole stack like production, run:
