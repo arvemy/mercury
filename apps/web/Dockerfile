@@ -3,6 +3,8 @@ FROM node:24-alpine AS base
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 HUSKY=0 TURBO_TELEMETRY_DISABLED=1
 RUN corepack enable
 WORKDIR /repo
+COPY package.json ./
+RUN corepack install
 
 FROM base AS prune
 COPY . .
