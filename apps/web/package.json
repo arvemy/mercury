@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint",
     "typecheck": "tsc -b",
     "preview": "vite preview",
     "test": "vitest run"
@@ -23,8 +22,6 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10",
-    "@shadcn/lint": "^0.2.0",
     "@tailwindcss/vite": "^4",
     "@tanstack/router-plugin": "^1.168.40",
     "@testing-library/dom": "^10.4.2",
@@ -36,13 +33,8 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitejs/plugin-react": "^6",
     "@workspace/api": "workspace:*",
-    "eslint": "^10.11.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^17",
     "jsdom": "^30.1.1",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint": "^8.70.1",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"
   }

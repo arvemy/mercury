@@ -38,7 +38,7 @@ For a change to a Dockerfile, the `Caddyfile`, or `docker-compose.yml`, also run
 
 For a change to `cli/` or to anything that ships in the template, also run:
 
-- `cli/scripts/smoke.sh`, with `DATABASE_URL` set. It creates a project from the packed CLI and runs its migrations, lint, typecheck, build, and tests.
+- `cli/scripts/smoke.sh`, with `DATABASE_URL` set. It creates a project from the packed CLI and runs its migrations, format check, lint, typecheck, build, and tests.
 - `cli/scripts/next-steps.sh`. It creates a project and runs the next steps the CLI prints. It needs Docker.
 
 Coding agents can use the `verify-mercury` and `verify-create-mercury` skills in `.agents/skills` to drive the real app and the real CLI.

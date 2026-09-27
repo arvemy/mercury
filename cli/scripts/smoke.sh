@@ -18,9 +18,9 @@ for file in .gitignore .npmrc apps/api/.env; do
 done
 [ "$(git rev-list --count HEAD)" = 1 ] || { echo "smoke: expected one initial commit"; exit 1; }
 
-for task in db:migrate lint typecheck build test; do
+for task in db:migrate format:check lint typecheck build test; do
   echo "smoke: pnpm $task"
   pnpm "$task" || { echo "smoke: pnpm $task failed"; exit 1; }
 done
 
-echo "smoke: generated project passed lint, typecheck, build, test"
+echo "smoke: generated project passed format, lint, typecheck, build, test"
