@@ -12,6 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "start": "turbo start",
+    "prod": "docker compose --profile prod up --build --wait",
+    "prod:down": "docker compose --profile prod down",
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
     "db:push": "turbo db:push",

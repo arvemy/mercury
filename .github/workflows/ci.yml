@@ -49,51 +49,43 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/app
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Build the API image
-        run: docker build -f apps/api/Dockerfile -t mercury-api .
-      - name: Start PostgreSQL
+      - name: Start the production stack
+        run: docker compose --profile prod up --build --wait
+      - name: Check migrations
         run: |
-          docker network create mercury
-          docker run -d --name db --network mercury -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=app postgres:18-alpine
-          until docker exec db pg_isready -h 127.0.0.1 -U postgres; do sleep 1; done
-      - name: Run migrations twice
+          test "$(docker inspect -f '{{.State.ExitCode}}' "$(docker compose ps -a -q migrate)")" = 0
+          docker compose --profile prod run --rm migrate
+      - name: Check the containers
         run: |
-          for _ in 1 2; do
-            docker run --rm --network mercury -e DATABASE_URL mercury-api node dist/migrate.js
+          for service in api web; do
+            test "$(docker compose exec -T "$service" id -u)" != 0
           done
-      - name: Run the API
+          if curl -s -o /dev/null localhost:3000; then
+            echo "The API must not be published on the host"
+            exit 1
+          fi
+      - name: Check the app through the web container
         run: |
-          docker run -d --name api --network mercury -p 3000:3000 -e DATABASE_URL mercury-api
-          for _ in $(seq 1 30); do
-            [ "$(docker inspect -f '{{.State.Health.Status}}' api)" = healthy ] && break
-            sleep 2
-          done
-          test "$(docker inspect -f '{{.State.Health.Status}}' api)" = healthy
-          test "$(docker exec api id -u)" != 0
-          test "$(curl -fsS localhost:3000/api/health)" = '{"status":"ok"}'
-          test "$(curl -fsS localhost:3000/api/todos)" = '[]'
-      - name: Build the web image
-        run: docker build -f apps/web/Dockerfile -t mercury-web .
-      - name: Run the web app
-        run: |
-          docker run -d --name web --network mercury -p 8080:8080 mercury-web
-          for _ in $(seq 1 30); do
-            [ "$(docker inspect -f '{{.State.Health.Status}}' web)" = healthy ] && break
-            sleep 2
-          done
-          test "$(docker inspect -f '{{.State.Health.Status}}' web)" = healthy
-          test "$(docker exec web id -u)" != 0
           curl -fsS localhost:8080/ | grep -q '<div id="root">'
           curl -fsS localhost:8080/todos | grep -q '<div id="root">'
           asset=$(curl -fsS localhost:8080/ | grep -o '/assets/index-[^"]*\.js')
           curl -fsSI "localhost:8080$asset" | grep -qi 'cache-control: public, max-age=31536000, immutable'
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/assets/missing.js)" = 404
           test "$(curl -fsS localhost:8080/api/health)" = '{"status":"ok"}'
-      - if: failure()
+          curl -fsS -X POST -H 'content-type: application/json' -d '{"title":"Ship it"}' localhost:8080/api/todos
+          curl -fsS localhost:8080/api/todos | grep -q '"title":"Ship it"'
+      - name: Check image sizes
         run: |
-          docker logs api || true
-          docker logs web || true
+          check_size() {
+            local mb=$(( $(docker image inspect -f '{{.Size}}' "$(docker compose images -q "$1" | head -1)") / 1000000 ))
+            echo "$1 image: $mb MB (budget $2 MB)"
+            test "$mb" -le "$2"
+          }
+          check_size api 250
+          check_size web 80
+      - if: failure()
+        run: docker compose --profile prod logs
+      - if: always()
+        run: docker compose --profile prod down -v
