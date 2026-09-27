@@ -28,16 +28,19 @@ pnpm dev
 
 ## What you get
 
-| Layer    | Tools                                                                                        |
-| -------- | -------------------------------------------------------------------------------------------- |
-| Web      | React 19, Vite, TanStack Router with file-based routes, TanStack Query                       |
-| API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app |
-| Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                  |
-| UI       | shadcn/ui components in a shared package, Tailwind CSS v4, a `d` key dark-mode toggle        |
-| Quality  | TypeScript 7, Vitest, ESLint, Prettier, a husky and lint-staged pre-commit hook              |
-| Build    | pnpm workspaces and Turborepo                                                                |
-| CI       | A GitHub Actions workflow that lints, typechecks, builds, migrates, and tests                |
-| Agents   | Skills for the stack in `.agents/skills`, linked for Claude Code                             |
+| Layer    | Tools                                                                                                    |
+| -------- | -------------------------------------------------------------------------------------------------------- |
+| Web      | React 19, Vite, TanStack Router with file-based routes, TanStack Query                                   |
+| API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app             |
+| Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                              |
+| UI       | shadcn/ui components in a shared package, Tailwind CSS v4, a `d` key dark-mode toggle                    |
+| Quality  | TypeScript 7, Vitest, ESLint, Prettier, a husky and lint-staged pre-commit hook                          |
+| Build    | pnpm workspaces and Turborepo                                                                            |
+| Deploy   | Separate production images for the web app (Caddy) and the API (Node), and a Compose `prod` profile      |
+| CI       | A GitHub Actions workflow that lints, typechecks, builds, migrates, tests, and runs the production stack |
+| Agents   | Skills for the stack in `.agents/skills`, linked for Claude Code                                         |
+
+`pnpm prod` builds both images and runs the stack like production at http://localhost:8080.
 
 A todos page shows the full path from schema to migration to API route to typed client to page. Delete it once you have your own.
 

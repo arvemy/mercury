@@ -34,6 +34,8 @@ Run these from the project root. Turborepo runs each one across every package.
 | ------------------ | ----------------------------------------------------------------------------- |
 | `pnpm dev`         | Start the database, migrate, then start the web app and the API in watch mode |
 | `pnpm dev:apps`    | Start only the web app and the API in watch mode                              |
+| `pnpm prod`        | Build the production images and start the stack at http://localhost:8080      |
+| `pnpm prod:down`   | Stop the production stack                                                     |
 | `pnpm build`       | Build every package                                                           |
 | `pnpm test`        | Run the Vitest suites                                                         |
 | `pnpm lint`        | Lint every package                                                            |
@@ -42,6 +44,39 @@ Run these from the project root. Turborepo runs each one across every package.
 | `pnpm db:generate` | Write a migration from schema changes                                         |
 | `pnpm db:migrate`  | Apply migrations                                                              |
 | `pnpm db:studio`   | Open Drizzle Studio                                                           |
+
+## Production containers
+
+The web app and the API each build into their own image.
+
+- `apps/api/Dockerfile` builds the API into a Node 24 image that runs as a non-root user. Its health check calls `/api/health`. The same image runs migrations with `node dist/migrate.js`.
+- `apps/web/Dockerfile` builds the web app and serves it with Caddy on port 8080 as a non-root user. Caddy proxies `/api` to the API, so the browser talks to one origin.
+
+To run the whole stack like production, run:
+
+```sh
+pnpm prod
+```
+
+This builds both images and starts PostgreSQL, a one-off migration job, the API, and the web app. The API starts only after migrations succeed. Open http://localhost:8080. The API is not published on the host. Stop the stack with `pnpm prod:down`.
+
+To deploy somewhere else, build the images from the project root:
+
+```sh
+docker build -f apps/api/Dockerfile -t my-app-api .
+docker build -f apps/web/Dockerfile -t my-app-web .
+```
+
+Then run them with these settings:
+
+| Container  | Setting                                                                    | Default    |
+| ---------- | -------------------------------------------------------------------------- | ---------- |
+| API        | `DATABASE_URL`                                                             | Required   |
+| API        | `PORT`                                                                     | `3000`     |
+| Migrations | Same image as the API, command `node dist/migrate.js`, with `DATABASE_URL` | None       |
+| Web        | `API_UPSTREAM`, the host and port of the API                               | `api:3000` |
+
+Run the migration command before you start a new API version. The credentials in `docker-compose.yml` are for your machine only. Use your own database and secrets in production. TLS belongs in front of the web container, for example in your platform's load balancer.
 
 ## Backend
 

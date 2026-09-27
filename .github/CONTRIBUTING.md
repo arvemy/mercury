@@ -34,6 +34,8 @@ pnpm build
 pnpm test
 ```
 
+For a change to a Dockerfile, the `Caddyfile`, or `docker-compose.yml`, also run `pnpm prod` and check http://localhost:8080. CI's `docker` job runs the same stack and checks it.
+
 For a change to `cli/` or to anything that ships in the template, also run:
 
 - `cli/scripts/smoke.sh`, with `DATABASE_URL` set. It creates a project from the packed CLI and runs its migrations, lint, typecheck, build, and tests.
