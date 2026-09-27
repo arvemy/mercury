@@ -76,5 +76,24 @@ jobs:
           test "$(docker exec api id -u)" != 0
           test "$(curl -fsS localhost:3000/api/health)" = '{"status":"ok"}'
           test "$(curl -fsS localhost:3000/api/todos)" = '[]'
+      - name: Build the web image
+        run: docker build -f apps/web/Dockerfile -t mercury-web .
+      - name: Run the web app
+        run: |
+          docker run -d --name web --network mercury -p 8080:8080 mercury-web
+          for _ in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' web)" = healthy ] && break
+            sleep 2
+          done
+          test "$(docker inspect -f '{{.State.Health.Status}}' web)" = healthy
+          test "$(docker exec web id -u)" != 0
+          curl -fsS localhost:8080/ | grep -q '<div id="root">'
+          curl -fsS localhost:8080/todos | grep -q '<div id="root">'
+          asset=$(curl -fsS localhost:8080/ | grep -o '/assets/index-[^"]*\.js')
+          curl -fsSI "localhost:8080$asset" | grep -qi 'cache-control: public, max-age=31536000, immutable'
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/assets/missing.js)" = 404
+          test "$(curl -fsS localhost:8080/api/health)" = '{"status":"ok"}'
       - if: failure()
-        run: docker logs api || true
+        run: |
+          docker logs api || true
+          docker logs web || true
