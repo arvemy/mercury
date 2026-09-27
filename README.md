@@ -34,7 +34,7 @@ pnpm dev
 | API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app             |
 | Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                              |
 | UI       | shadcn/ui components in a shared package, Tailwind CSS v4, a `d` key dark-mode toggle                    |
-| Quality  | TypeScript 7, Vitest, ESLint, Prettier, a husky and lint-staged pre-commit hook                          |
+| Quality  | TypeScript 7, Vitest, Oxlint, Oxfmt, a husky and lint-staged pre-commit hook                             |
 | Build    | pnpm workspaces and Turborepo                                                                            |
 | Deploy   | Separate production images for the web app (Caddy) and the API (Node), and a Compose `prod` profile      |
 | CI       | A GitHub Actions workflow that lints, typechecks, builds, migrates, tests, and runs the production stack |
@@ -65,7 +65,7 @@ This repository is the template. The root is a working Mercury app, and `cli/` h
 
 - `pnpm dev`, `pnpm test`, and the other root scripts run the template app.
 - `cli/scripts/next-steps.sh` creates a project and runs the next steps the CLI prints, then checks that the app answers. It needs Docker.
-- `cli/scripts/smoke.sh` packs the CLI, creates a project from the tarball, and runs its migrations, lint, typecheck, build, and tests. Set `DATABASE_URL` first.
+- `cli/scripts/smoke.sh` packs the CLI, creates a project from the tarball, and runs its migrations, format check, lint, typecheck, build, and tests. Set `DATABASE_URL` first.
 - `cli/scripts/snapshot.ts` decides what ships. Repo-only files go in its `EXCLUDED` list. From `.github/`, only `workflows/ci.yml` ships.
 - `cli/project-readme.md` is the README that generated projects get.
 - The `verify-mercury` and `verify-create-mercury` skills drive the real app and the real CLI for end-to-end checks.

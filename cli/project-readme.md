@@ -24,7 +24,7 @@ The todos page is a worked example of the full path from schema to screen. Delet
 | `apps/api`    | Hono on Node, with Drizzle ORM on PostgreSQL and zod validation                                    |
 | `packages/ui` | Shared shadcn/ui components and the Tailwind CSS v4 theme                                          |
 
-Vitest, ESLint, Prettier, a husky pre-commit hook, and a GitHub Actions workflow are set up.
+Vitest, Oxlint, Oxfmt, a husky pre-commit hook, and a GitHub Actions workflow are set up.
 
 ## Scripts
 
@@ -40,7 +40,7 @@ Run these from the project root. Turborepo runs each one across every package.
 | `pnpm test`        | Run the Vitest suites                                                         |
 | `pnpm lint`        | Lint every package                                                            |
 | `pnpm typecheck`   | Typecheck every package                                                       |
-| `pnpm format`      | Format the repo with Prettier                                                 |
+| `pnpm format`      | Format the repo with Oxfmt                                                    |
 | `pnpm db:generate` | Write a migration from schema changes                                         |
 | `pnpm db:migrate`  | Apply migrations                                                              |
 | `pnpm db:studio`   | Open Drizzle Studio                                                           |
