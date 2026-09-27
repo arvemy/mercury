@@ -83,8 +83,8 @@ jobs:
             echo "$1 image: $mb MB (budget $2 MB)"
             test "$mb" -le "$2"
           }
-          check_size api 250
-          check_size web 80
+          check_size api 220
+          check_size web 75
       - if: failure()
         run: docker compose --profile prod logs
       - if: always()
