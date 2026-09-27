@@ -28,7 +28,7 @@ Vitest, Oxlint, Oxfmt, a husky pre-commit hook, and a GitHub Actions workflow ar
 
 ## Scripts
 
-Run these from the project root. Turborepo runs each one across every package.
+Run these from the project root.
 
 | Script             | What it does                                                                  |
 | ------------------ | ----------------------------------------------------------------------------- |
@@ -38,7 +38,7 @@ Run these from the project root. Turborepo runs each one across every package.
 | `pnpm prod:down`   | Stop the production stack                                                     |
 | `pnpm build`       | Build every package                                                           |
 | `pnpm test`        | Run the Vitest suites                                                         |
-| `pnpm lint`        | Lint every package                                                            |
+| `pnpm lint`        | Lint the repo with Oxlint                                                     |
 | `pnpm typecheck`   | Typecheck every package                                                       |
 | `pnpm format`      | Format the repo with Oxfmt                                                    |
 | `pnpm db:generate` | Write a migration from schema changes                                         |

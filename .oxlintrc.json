@@ -3,7 +3,12 @@
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "react"],
   "jsPlugins": [{ "name": "shadcn", "specifier": "@shadcn/lint" }],
   "categories": { "correctness": "error" },
-  "ignorePatterns": ["**/dist", "apps/web/src/routeTree.gen.ts"],
+  "ignorePatterns": [
+    "**/dist",
+    ".agents/",
+    ".claude/",
+    "apps/web/src/routeTree.gen.ts"
+  ],
   "rules": {
     "no-array-constructor": "error",
     "no-case-declarations": "error",
@@ -13,6 +18,7 @@
     "no-redeclare": "error",
     "no-regex-spaces": "error",
     "no-unexpected-multiline": "error",
+    "no-useless-assignment": "error",
     "no-var": "error",
     "prefer-const": "error",
     "prefer-rest-params": "error",
