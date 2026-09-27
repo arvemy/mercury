@@ -1,10 +1,9 @@
 # Build from the repository root: docker build -f apps/web/Dockerfile .
 FROM node:26-alpine AS base
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 HUSKY=0 TURBO_TELEMETRY_DISABLED=1
-RUN npm install -g corepack@0.36.0 && corepack enable
+ENV HUSKY=0 TURBO_TELEMETRY_DISABLED=1
 WORKDIR /repo
 COPY package.json ./
-RUN corepack install
+RUN npm install -g "$(node -p 'require("./package.json").packageManager')"
 
 FROM base AS prune
 COPY . .
