@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/.turbo
+**/.env
+!**/.env.example
+.git
+.agents
+.claude
+cli/template
+coverage
+*.log

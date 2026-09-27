@@ -46,3 +46,35 @@ jobs:
       - run: pnpm build
       - run: pnpm db:migrate
       - run: pnpm test
+
+  docker:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build the API image
+        run: docker build -f apps/api/Dockerfile -t mercury-api .
+      - name: Start PostgreSQL
+        run: |
+          docker network create mercury
+          docker run -d --name db --network mercury -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=app postgres:18-alpine
+          until docker exec db pg_isready -h 127.0.0.1 -U postgres; do sleep 1; done
+      - name: Run migrations twice
+        run: |
+          for _ in 1 2; do
+            docker run --rm --network mercury -e DATABASE_URL mercury-api node dist/migrate.js
+          done
+      - name: Run the API
+        run: |
+          docker run -d --name api --network mercury -p 3000:3000 -e DATABASE_URL mercury-api
+          for _ in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' api)" = healthy ] && break
+            sleep 2
+          done
+          test "$(docker inspect -f '{{.State.Health.Status}}' api)" = healthy
+          test "$(docker exec api id -u)" != 0
+          test "$(curl -fsS localhost:3000/api/health)" = '{"status":"ok"}'
+          test "$(curl -fsS localhost:3000/api/todos)" = '[]'
+      - if: failure()
+        run: docker logs api || true
