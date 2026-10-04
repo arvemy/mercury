@@ -7,7 +7,7 @@ RUN npm install -g "$(node -p 'require("./package.json").packageManager')"
 
 FROM base AS prune
 COPY . .
-RUN pnpm dlx turbo@2.11.4 prune @workspace/api --docker
+RUN pnpm dlx "turbo@$(node -p 'require("./package.json").devDependencies.turbo')" prune @workspace/api --docker
 
 FROM base AS build
 COPY --from=prune /repo/out/json/ .
