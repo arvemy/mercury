@@ -19,12 +19,12 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4",
-    "@turbo/gen": "^2.11.5",
+    "@turbo/gen": "^2.11.6",
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@typescript/native": "npm:typescript@^7.0.2",
-    "shadcn": "^4.21.0",
+    "shadcn": "^4.21.1",
     "tailwindcss": "^4",
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
