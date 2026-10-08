@@ -6,6 +6,8 @@ import {
   createRootRouteWithContext,
 } from "@tanstack/react-router"
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools"
+import { Anchor, Box, Group, Stack } from "@mantine/core"
+import classes from "./layout.module.css"
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   { component: RootLayout }
@@ -15,27 +17,30 @@ const showDevtools = import.meta.env.DEV
 
 function RootLayout() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <nav className="flex gap-4 text-muted-foreground">
-          <Link to="/" activeProps={{ className: "text-foreground" }}>
+    <Box component="main" mih="100svh" p="lg">
+      <Stack maw={448} w="100%" gap="md">
+        <Group component="nav" gap="md">
+          <Anchor
+            className={classes.navLink}
+            renderRoot={(props) => <Link {...props} to="/" />}
+          >
             Home
-          </Link>
-          <Link to="/todos" activeProps={{ className: "text-foreground" }}>
+          </Anchor>
+          <Anchor
+            className={classes.navLink}
+            renderRoot={(props) => <Link {...props} to="/todos" />}
+          >
             Todos
-          </Link>
-        </nav>
+          </Anchor>
+        </Group>
         <Outlet />
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
+      </Stack>
       {showDevtools && (
         <>
           <TanStackRouterDevtools />
           <ReactQueryDevtools />
         </>
       )}
-    </div>
+    </Box>
   )
 }

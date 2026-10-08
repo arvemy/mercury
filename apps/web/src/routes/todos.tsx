@@ -5,8 +5,15 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@workspace/ui/components/button"
-import { Input } from "@workspace/ui/components/input"
+import {
+  Button,
+  Group,
+  List,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core"
 import { api } from "@/lib/api"
 import { todosQuery } from "@/lib/queries"
 
@@ -32,30 +39,38 @@ function Todos() {
   })
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="font-medium">Todos</h1>
+    <Stack gap="md">
+      <Title order={1}>Todos</Title>
       {todos.length === 0 ? (
-        <p className="text-muted-foreground">No todos yet.</p>
+        <Text c="dimmed">No todos yet.</Text>
       ) : (
-        <ul className="flex flex-col gap-1">
+        <List spacing="xs">
           {todos.map((todo) => (
-            <li key={todo.id} className="flex gap-2">
-              <span>{todo.title}</span>
-              {todo.completed && (
-                <span className="text-muted-foreground">done</span>
-              )}
-            </li>
+            <List.Item key={todo.id}>
+              <Group gap="xs">
+                <Text span>{todo.title}</Text>
+                {todo.completed && (
+                  <Text span c="dimmed">
+                    done
+                  </Text>
+                )}
+              </Group>
+            </List.Item>
           ))}
-        </ul>
+        </List>
       )}
-      <form
-        className="flex gap-2"
+      <Group
+        component="form"
+        wrap="nowrap"
+        gap="xs"
         onSubmit={(event) => {
           event.preventDefault()
           if (title.trim()) addTodo.mutate(title.trim())
         }}
       >
-        <Input
+        <TextInput
+          flex={1}
+          miw={0}
           aria-label="New todo"
           placeholder="What needs doing?"
           value={title}
@@ -64,12 +79,12 @@ function Todos() {
         <Button type="submit" disabled={addTodo.isPending}>
           Add
         </Button>
-      </form>
+      </Group>
       {addTodo.isError && (
-        <p role="alert" className="text-destructive">
+        <Text role="alert" c="red">
           Couldn't add the todo. Try again.
-        </p>
+        </Text>
       )}
-    </div>
+    </Stack>
   )
 }

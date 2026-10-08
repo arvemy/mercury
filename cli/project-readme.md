@@ -22,7 +22,7 @@ The todos page is a worked example of the full path from schema to screen. Delet
 | ------------- | -------------------------------------------------------------------------------------------------- |
 | `apps/web`    | React 19 on Vite, with TanStack Router for file-based routing and TanStack Query for data fetching |
 | `apps/api`    | Hono on Node, with Drizzle ORM on PostgreSQL and zod validation                                    |
-| `packages/ui` | Shared shadcn/ui components and the Tailwind CSS v4 theme                                          |
+| `packages/ui` | Shared Mantine theme configuration and custom components                                           |
 
 Vitest, Oxlint, Oxfmt, a husky pre-commit hook, and a GitHub Actions workflow are set up.
 
@@ -104,18 +104,18 @@ The schema lives in `apps/api/src/db/schema.ts`. After changing it, run `pnpm db
 
 ## UI components
 
-Add shadcn/ui components from the project root.
-
-```sh
-pnpm dlx shadcn@latest add button -c apps/web
-```
-
-They land in `packages/ui/src/components`. Import them from the `ui` package.
+Import standard components directly from Mantine.
 
 ```tsx
-import { Button } from "@workspace/ui/components/button"
+import { Button, TextInput } from "@mantine/core"
 ```
+
+The app imports Mantine's core styles and uses `MantineProvider` with the shared theme from `packages/ui/src/theme.ts`. Edit that theme to customize colors, typography, and component defaults. Add reusable custom components under `packages/ui/src/components` and export them from `packages/ui/package.json`.
+
+The theme follows the system color scheme by default. Use `useMantineColorScheme` when adding a color-scheme control. Mantine stores the choice under its native `mantine-color-scheme-value` key. Custom styles use CSS modules with Mantine's PostCSS preset.
 
 ## Agent skills
 
-Coding agents get skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. They cover shadcn/ui, Turborepo, React composition and performance, React view transitions, web design guidelines, web app testing, Conventional Commits, and Semantic Versioning. `skills-lock.json` records the sources of the skills installed with `npx skills`, and `npx skills update` refreshes them.
+Coding agents get skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. The official Mantine skills cover comboboxes, forms, and custom components. Other skills cover Turborepo, React composition and performance, React view transitions, web design guidelines, web app testing, Conventional Commits, and Semantic Versioning. `skills-lock.json` records the sources of the skills installed with `npx skills`, and `npx skills update` refreshes them.
+
+Use Mantine's [LLM documentation](https://mantine.dev/llms.txt) for component APIs, hooks, theming, and styling.

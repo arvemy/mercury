@@ -19,7 +19,7 @@ describe("isTemplateFile", () => {
   it("keeps app files and the user-facing CI workflow", () => {
     expect(isTemplateFile("apps/api/src/app.ts")).toBe(true)
     expect(isTemplateFile(".github/workflows/ci.yml")).toBe(true)
-    expect(isTemplateFile(".agents/skills/shadcn/SKILL.md")).toBe(true)
+    expect(isTemplateFile(".agents/skills/mantine-form/SKILL.md")).toBe(true)
     expect(isTemplateFile("skills-lock.json")).toBe(true)
   })
 
@@ -62,6 +62,15 @@ describe("snapshot", () => {
     const files = listFiles(first)
     expect(listFiles(second)).toEqual(files)
     expect(files).toContain("_gitignore")
+    expect(files).toContain("packages/ui/src/theme.ts")
+    expect(files).toContain("apps/web/postcss.config.cjs")
+    for (const skill of [
+      "mantine-combobox",
+      "mantine-form",
+      "mantine-custom-components",
+    ]) {
+      expect(files).toContain(`.agents/skills/${skill}/SKILL.md`)
+    }
     expect(fs.readFileSync(path.join(first, "README.md"), "utf8")).toBe(
       fs.readFileSync(path.join(repoRoot, "cli/project-readme.md"), "utf8")
     )

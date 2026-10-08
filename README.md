@@ -33,7 +33,7 @@ pnpm dev
 | Web      | React 19, Vite, TanStack Router with file-based routes, TanStack Query                                   |
 | API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app             |
 | Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                              |
-| UI       | shadcn/ui components in a shared package, Tailwind CSS v4, a `d` key dark-mode toggle                    |
+| UI       | Mantine 9 components and shared theme configuration                                                      |
 | Quality  | TypeScript 7, Vitest, Oxlint, Oxfmt, a husky and lint-staged pre-commit hook                             |
 | Build    | pnpm workspaces and Turborepo                                                                            |
 | Deploy   | Separate production images for the web app (Caddy) and the API (Node), and a Compose `prod` profile      |
@@ -52,12 +52,16 @@ my-app/
 │   ├── api/        Hono API, Drizzle schema and migrations
 │   └── web/        React app, routes, and queries
 ├── packages/
-│   └── ui/         shadcn/ui components and the Tailwind theme
+│   └── ui/         Shared Mantine theme and custom components
 ├── .agents/skills/ Skills for coding agents
 └── docker-compose.yml
 ```
 
 The generated project has its own README with scripts and how each part works.
+
+Mantine uses its native theme system and follows the system color scheme by default. Customize the shared theme in `packages/ui/src/theme.ts` and import standard components from `@mantine/core`.
+
+The project includes the official `mantine-combobox`, `mantine-form`, and `mantine-custom-components` agent skills. Mantine's [LLM documentation](https://mantine.dev/llms.txt) covers components, hooks, theming, and styling.
 
 ## Work on Mercury
 
