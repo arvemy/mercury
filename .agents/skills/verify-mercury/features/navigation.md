@@ -23,7 +23,7 @@ Preconditions:
 
   ```
   ACT='expect-js "[...document.querySelectorAll(\"nav a\")].map(a => a.textContent + \":\" + (a.getAttribute(\"aria-current\") === \"page\" ? \"active\" : \"-\")).join()"'
-  $S/drive.py nav-links 'goto /' 'expect heading "Project ready!"' "$ACT Home:active,Todos:-" 'shot home-active' 'expect-js "(window.__spa = 1)" 1' 'click link Todos' 'expect-url /todos' 'expect heading Todos' 'expect-js window.__spa 1' "$ACT Home:-,Todos:active" 'expect-js "document.querySelector(\"nav a[aria-current=page]\").classList.contains(\"text-foreground\")" true' 'shot todos-active' 'click link Home' 'expect-url /' 'expect-js window.__spa 1' "$ACT Home:active,Todos:-" 'shot back-home'
+  $S/drive.py nav-links 'goto /' 'expect heading "Project ready!"' "$ACT Home:active,Todos:-" 'shot home-active' 'expect-js "(window.__spa = 1)" 1' 'click link Todos' 'expect-url /todos' 'expect heading Todos' 'expect-js window.__spa 1' "$ACT Home:-,Todos:active" 'shot todos-active' 'click link Home' 'expect-url /' 'expect-js window.__spa 1' "$ACT Home:active,Todos:-" 'shot back-home'
   ```
 
   `window.__spa` survives each click, which proves no full page load happened. The screenshots show the active link darker than the other one.

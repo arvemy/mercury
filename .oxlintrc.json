@@ -1,8 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "react"],
-  "jsPlugins": [{ "name": "shadcn", "specifier": "@shadcn/lint" }],
-  "categories": { "correctness": "error" },
+  "categories": {
+    "correctness": "error"
+  },
   "ignorePatterns": [
     "**/dist",
     ".agents/",
@@ -35,26 +36,18 @@
     "react/incompatible-library": "warn",
     "react/unsupported-syntax": "warn",
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["error", { "allowConstantExport": true }],
-    "shadcn/no-restyle": ["error", { "allow": ["layout"] }],
-    "shadcn/no-raw-colors": "error",
-    "shadcn/no-arbitrary-values": ["error", { "allow": ["layout"] }],
-    "shadcn/no-inline-styles": "error",
-    "shadcn/no-unknown-classes": "error",
-    "shadcn/require-static-classes": "error"
+    "react/only-export-components": [
+      "error",
+      {
+        "allowConstantExport": true
+      }
+    ]
   },
   "overrides": [
     {
       "files": ["apps/web/src/routes/**/*.tsx"],
-      "rules": { "react/only-export-components": "off" }
-    },
-    {
-      "files": ["packages/ui/src/components/**"],
       "rules": {
-        "react/only-export-components": "off",
-        "shadcn/no-restyle": "off",
-        "shadcn/no-arbitrary-values": "off",
-        "shadcn/require-static-classes": "off"
+        "react/only-export-components": "off"
       }
     }
   ]

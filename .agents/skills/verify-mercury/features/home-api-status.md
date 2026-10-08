@@ -29,4 +29,4 @@ Preconditions:
 
 - `API: unreachable` appears only after React Query's 3 retries, about 7s. `drive.py`'s 15s timeout covers that. Don't lower it.
 - With the API down, Vite's proxy returns 502 and logs `http proxy error` in `logs/web.log`. That is expected.
-- The `Button` on the home page does nothing. It is a shadcn demo, so don't verify a click result.
+- The `Button` on the home page does nothing. It is a Mantine demo, so don't verify a click result.

@@ -32,5 +32,5 @@ Each feature file has an H1 and a one-paragraph description. Then come four H2s,
 - [Todos](./todos.md) covers the list, the empty state, adding a todo, blank-input rejection, and persistence.
 - [Home and API status](./home-api-status.md) covers the landing page and its live `API:` indicator, including the unreachable state.
 - [Navigation](./navigation.md) covers the Home/Todos nav links, active-link styling, and deep links.
-- [Theme toggle](./theme-toggle.md) covers the `d` key toggling dark mode, persistence across navigation, and the editable-field exception.
+- [Color scheme](./color-scheme.md) covers Mantine's native system color scheme and saved preferences.
 - [HTTP API](./http-api.md) covers `/api/health`, `/api/hello`, and `/api/todos` as a secondary surface, with its validation errors.

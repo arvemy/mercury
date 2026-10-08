@@ -2,9 +2,10 @@ import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { RouterProvider, createRouter } from "@tanstack/react-router"
+import { MantineProvider } from "@mantine/core"
+import { theme } from "@workspace/ui/theme"
 
-import "@workspace/ui/globals.css"
-import { ThemeProvider } from "@/components/theme-provider.tsx"
+import "@mantine/core/styles.css"
 import { routeTree } from "./routeTree.gen"
 
 const queryClient = new QueryClient()
@@ -24,10 +25,10 @@ declare module "@tanstack/react-router" {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider>
+    <MantineProvider theme={theme} defaultColorScheme="auto">
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </ThemeProvider>
+    </MantineProvider>
   </StrictMode>
 )

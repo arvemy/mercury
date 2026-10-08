@@ -6,10 +6,6 @@
   "trailingComma": "es5",
   "printWidth": 80,
   "sortPackageJson": false,
-  "sortTailwindcss": {
-    "stylesheet": "packages/ui/src/styles/globals.css",
-    "functions": ["cn", "cva"]
-  },
   "ignorePatterns": [
     "dist/",
     "node_modules/",

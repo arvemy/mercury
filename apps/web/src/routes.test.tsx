@@ -1,4 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { MantineProvider } from "@mantine/core"
+import { theme } from "@workspace/ui/theme"
 import {
   RouterProvider,
   createMemoryHistory,
@@ -27,9 +29,11 @@ function renderRoute(path: string) {
     history: createMemoryHistory({ initialEntries: [path] }),
   })
   render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <MantineProvider theme={theme} env="test">
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </MantineProvider>
   )
 }
 
