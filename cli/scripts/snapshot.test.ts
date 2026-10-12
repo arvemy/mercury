@@ -21,6 +21,7 @@ describe("isTemplateFile", () => {
     expect(isTemplateFile(".github/workflows/ci.yml")).toBe(true)
     expect(isTemplateFile(".agents/skills/mantine-form/SKILL.md")).toBe(true)
     expect(isTemplateFile("skills-lock.json")).toBe(true)
+    expect(isTemplateFile(".mcp.json")).toBe(true)
   })
 
   it("drops repo-only files", () => {
@@ -62,6 +63,7 @@ describe("snapshot", () => {
     const files = listFiles(first)
     expect(listFiles(second)).toEqual(files)
     expect(files).toContain("_gitignore")
+    expect(files).toContain(".mcp.json")
     expect(files).toContain("packages/ui/src/theme.ts")
     expect(files).toContain("apps/web/postcss.config.cjs")
     for (const skill of [
