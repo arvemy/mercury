@@ -110,6 +110,12 @@ Import standard components directly from Mantine.
 import { Button, TextInput } from "@mantine/core"
 ```
 
+Icons come from [Tabler Icons](https://tabler.io/icons). Import each icon by name from `@tabler/icons-react` and pass it to props such as a button's `leftSection`.
+
+```tsx
+import { IconPlus } from "@tabler/icons-react"
+```
+
 The app imports Mantine's core styles and uses `MantineProvider` with the shared theme from `packages/ui/src/theme.ts`. Edit that theme to customize colors, typography, and component defaults. Add reusable custom components under `packages/ui/src/components` and export them from `packages/ui/package.json`.
 
 The theme follows the system color scheme by default. Use `useMantineColorScheme` when adding a color-scheme control. Mantine stores the choice under its native `mantine-color-scheme-value` key. Custom styles use CSS modules with Mantine's PostCSS preset.

@@ -33,7 +33,7 @@ pnpm dev
 | Web      | React 19, Vite, TanStack Router with file-based routes, TanStack Query                                   |
 | API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app             |
 | Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                              |
-| UI       | Mantine 9 components and shared theme configuration                                                      |
+| UI       | Mantine 9 components, shared theme configuration, and Tabler Icons                                       |
 | Quality  | TypeScript 7, Vitest, Oxlint, Oxfmt, a husky and lint-staged pre-commit hook                             |
 | Build    | pnpm workspaces and Turborepo                                                                            |
 | Deploy   | Separate production images for the web app (Caddy) and the API (Node), and a Compose `prod` profile      |

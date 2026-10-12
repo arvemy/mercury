@@ -14,6 +14,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core"
+import { IconPlus } from "@tabler/icons-react"
 import { api } from "@/lib/api"
 import { todosQuery } from "@/lib/queries"
 
@@ -76,7 +77,11 @@ function Todos() {
           value={title}
           onChange={(event) => setTitle(event.target.value)}
         />
-        <Button type="submit" disabled={addTodo.isPending}>
+        <Button
+          type="submit"
+          disabled={addTodo.isPending}
+          leftSection={<IconPlus size={16} aria-hidden />}
+        >
           Add
         </Button>
       </Group>
