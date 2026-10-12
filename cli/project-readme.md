@@ -119,3 +119,5 @@ The theme follows the system color scheme by default. Use `useMantineColorScheme
 Coding agents get skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. The official Mantine skills cover comboboxes, forms, and custom components. Other skills cover Turborepo, React composition and performance, React view transitions, web design guidelines, web app testing, Conventional Commits, and Semantic Versioning. `skills-lock.json` records the sources of the skills installed with `npx skills`, and `npx skills update` refreshes them.
 
 Use Mantine's [LLM documentation](https://mantine.dev/llms.txt) for component APIs, hooks, theming, and styling.
+
+`.mcp.json` registers Mantine's MCP server, which lets agents search the Mantine docs and look up component props. Claude Code asks you to approve it the first time. Other agents can add it with the command from [Mantine's guide](https://mantine.dev/guides/llms/), such as `codex mcp add mantine -- npx -y @mantine/mcp-server`.

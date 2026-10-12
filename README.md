@@ -61,7 +61,7 @@ The generated project has its own README with scripts and how each part works.
 
 Mantine uses its native theme system and follows the system color scheme by default. Customize the shared theme in `packages/ui/src/theme.ts` and import standard components from `@mantine/core`.
 
-The project includes the official `mantine-combobox`, `mantine-form`, and `mantine-custom-components` agent skills. Mantine's [LLM documentation](https://mantine.dev/llms.txt) covers components, hooks, theming, and styling.
+The project includes the official `mantine-combobox`, `mantine-form`, and `mantine-custom-components` agent skills. Mantine's [LLM documentation](https://mantine.dev/llms.txt) covers components, hooks, theming, and styling. `.mcp.json` registers [Mantine's MCP server](https://mantine.dev/guides/llms/) for Claude Code.
 
 ## Work on Mercury
 

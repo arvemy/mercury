@@ -13,7 +13,7 @@ pnpm dlx "$tarball" smoke-app
 cd smoke-app
 grep -q "<title>smoke-app</title>" apps/web/index.html || { echo "smoke: page title not set"; exit 1; }
 
-for file in .gitignore .npmrc apps/api/.env; do
+for file in .gitignore .npmrc .mcp.json apps/api/.env; do
   [ -f "$file" ] || { echo "smoke: missing $file"; exit 1; }
 done
 [ "$(git rev-list --count HEAD)" = 1 ] || { echo "smoke: expected one initial commit"; exit 1; }
