@@ -31,6 +31,7 @@ describe("isTemplateFile", () => {
     expect(isTemplateFile(".github/SECURITY.md")).toBe(false)
     expect(isTemplateFile(".github/ISSUE_TEMPLATE/bug_report.yml")).toBe(false)
     expect(isTemplateFile(".github/dependabot.yml")).toBe(false)
+    expect(isTemplateFile(".agents/skills/verify/SKILL.md")).toBe(false)
     expect(isTemplateFile(".agents/skills/verify-mercury/SKILL.md")).toBe(false)
     expect(
       isTemplateFile(".agents/skills/verify-create-mercury/SKILL.md")
