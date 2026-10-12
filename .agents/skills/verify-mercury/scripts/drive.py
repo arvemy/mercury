@@ -1,7 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["playwright==1.63.0"]
+# ///
 """Drive the web UI of a verification run with headless Chromium (Playwright).
 
 Usage: drive.py <label> '<step>' ['<step>' ...]
+       drive.py --browser-path   print the Chromium binary Playwright will launch
 
 Runs all steps in one browser session against $VERIFY_RUN's web URL and writes
 evidence to $VERIFY_RUN/evidence/<label>/: steps.log, console.log, network.log,
@@ -12,7 +17,7 @@ Steps (shell-quoted; ROLE is an ARIA role such as button, link, textbox, heading
   goto PATH                     open PATH (e.g. /todos) and wait for network idle
   click ROLE NAME               click the element with that role and accessible name
   fill ROLE NAME VALUE          replace the element's value
-  press KEY                     keyboard press on the page (e.g. d, Enter)
+  press KEY                     keyboard press on the page (e.g. Enter, Tab)
   expect ROLE NAME              element with role+name is visible
   expect-value ROLE NAME VALUE  form control's current value equals VALUE ("" for empty)
   expect-text TEXT              TEXT is visible somewhere on the page
@@ -50,6 +55,10 @@ expect.set_options(timeout=15_000)
 
 
 def main() -> int:
+    if sys.argv[1:] == ["--browser-path"]:
+        with sync_playwright() as p:
+            print(p.chromium.executable_path)
+        return 0
     if len(sys.argv) < 3 or sys.argv[1] in ("-h", "--help"):
         print(__doc__)
         return 2

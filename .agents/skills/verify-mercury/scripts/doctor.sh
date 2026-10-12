@@ -38,6 +38,10 @@ fi
 health=$(curl -fsS "$WEB_URL/api/health" 2>&1)
 [ "$health" = '{"status":"ok"}' ] && ok "web proxy -> api health: $health" || bad "health via $WEB_URL/api/health: $health"
 
+browser=$(uv run --quiet --script "$(dirname "$0")/drive.py" --browser-path 2>&1)
+if [ -x "$browser" ]; then ok "drive.py browser $browser"
+else bad "drive.py browser not ready: $browser (needs uv; then run: uv run --with playwright==1.63.0 playwright install chromium)"; fi
+
 head_now=$(git -C "$REPO" rev-parse --short HEAD)
 dirty=$(git -C "$REPO" status --porcelain -- apps packages | wc -l)
 if [ "$head_now" = "$GIT_HEAD" ]; then ok "git HEAD $head_now ($dirty uncommitted file(s) under apps/ packages/; dev servers hot-reload them)"
