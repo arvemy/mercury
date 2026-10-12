@@ -37,13 +37,14 @@ This check is read-only and exits 1 on any `FAIL`. It checks that:
 - each port is owned by *this run's* process group, not someone else's server;
 - Postgres is up and the `todos` table is queryable (it prints the row count);
 - `/api/health` through the web proxy returns `{"status":"ok"}`;
+- `drive.py` can find the Chromium build its Playwright version launches;
 - `HEAD` still matches the commit the run started on.
 
 Run it first, and again whenever a step behaves oddly. If it fails, read the logs, then `down.sh` and `up.sh`. Don't patch a half-dead run.
 
 ## Drive
 
-**Browser:** `drive.py` runs headless Chromium through Python Playwright, which is installed here. Each invocation is one fresh browser session with empty localStorage, running the steps in order and stopping at the first failure.
+**Browser:** `drive.py` runs headless Chromium through Python Playwright. It is a `uv` script that declares `playwright==1.63.0` inline, so `uv` provides Playwright and no system Python package is needed. If `doctor.sh` reports the browser missing, run `uv run --with playwright==1.63.0 playwright install chromium` once. Each invocation is one fresh browser session with empty localStorage, running the steps in order and stopping at the first failure.
 
 ```bash
 $S/drive.py <label> '<step>' '<step>' ...
@@ -54,7 +55,7 @@ $S/drive.py --help                     # full step list
 |---|---|
 | `goto PATH` | open `WEB_URL+PATH`, wait for network idle |
 | `click ROLE NAME` / `fill ROLE NAME VALUE` | act on an element by ARIA role + exact accessible name |
-| `press KEY` | keyboard press on the page (`d`, `Enter`) |
+| `press KEY` | keyboard press on the page (`Enter`, `Tab`) |
 | `expect ROLE NAME` / `expect-text TEXT` / `expect-no-text TEXT` | visibility assertions (exact match, 15s timeout) |
 | `expect-value ROLE NAME VALUE` | a form control's value |
 | `expect-url PATH` | current path |
