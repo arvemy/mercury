@@ -3,9 +3,10 @@
   "skills": {
     "hono": {
       "source": "honojs/skills",
+      "ref": "c07147a801de9d2bb25578b70dae853179ae5f53",
       "sourceType": "github",
       "skillPath": "skills/hono/SKILL.md",
-      "computedHash": "f469bac28a53d010bb47bd61109d0cfebe9a4f3fd407310746114549886b5870"
+      "computedHash": "e3f141a41800df815000216a53510fe6f888629471c214706cc05adff27297fb"
     },
     "mantine-combobox": {
       "source": "mantinedev/skills",
