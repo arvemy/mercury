@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { afterAll, beforeEach, describe, expect, it } from "vitest"
+import { afterAll, beforeEach, describe, expect, it } from "vite-plus/test"
 import { app } from "./app.js"
 import { db } from "./db/index.js"
 

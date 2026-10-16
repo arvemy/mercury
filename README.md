@@ -4,7 +4,7 @@
 [![CI](https://github.com/arvemy/mercury/actions/workflows/ci.yml/badge.svg)](https://github.com/arvemy/mercury/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
-An opinionated TypeScript full-stack starter. React, Hono, and PostgreSQL, powered by pnpm and Turborepo.
+An opinionated TypeScript full-stack starter. React, Hono, and PostgreSQL, powered by Vite+, pnpm, and Turborepo.
 
 ```sh
 pnpm create mercury my-app
@@ -30,7 +30,7 @@ pnpm dev
 
 | Layer    | Tools                                                                                                    |
 | -------- | -------------------------------------------------------------------------------------------------------- |
-| Web      | React 19, Vite, TanStack Router with file-based routes, TanStack Query                                   |
+| Web      | React 19, Vite+, TanStack Router with file-based routes, TanStack Query                                  |
 | API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app             |
 | Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                              |
 | UI       | Mantine 9 components, shared theme configuration, and Tabler Icons                                       |
@@ -58,6 +58,18 @@ my-app/
 ```
 
 The generated project has its own README with scripts and how each part works.
+
+Vite+ 1.2.0 is pinned in the workspace catalog. No global installation is required.
+After `pnpm install`, run `pnpm exec vp check` for format, lint, and type checks,
+or `pnpm exec vp test` for all test projects. API tests need `DATABASE_URL` pointing
+to a migrated test database.
+
+Use `pnpm exec vp run dev` for the full development script, including the database
+and API. `pnpm exec vp -C apps/web dev` starts only the Vite dev server.
+`pnpm exec vp run build` builds the workspace through Turborepo, preserving
+dependency order and TypeScript declarations. Built-in `vp test` runs Vitest,
+while `vp run test` runs the workspace's test script. See the
+[Vite+ command guide](https://viteplus.dev/guide).
 
 Mantine uses its native theme system and follows the system color scheme by default. Customize the shared theme in `packages/ui/src/theme.ts` and import standard components from `@mantine/core`.
 

@@ -1,6 +1,6 @@
 {
   "name": "create-mercury",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Create a Mercury project. An opinionated TypeScript full-stack starter with React, Hono, and PostgreSQL.",
   "keywords": [
     "create",
@@ -33,7 +33,7 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b",
-    "test": "vitest run",
+    "test": "vp test run",
     "snapshot": "node dist/scripts/snapshot.js",
     "prepack": "tsc -b && pnpm snapshot"
   },
@@ -41,7 +41,7 @@
     "@types/node": "^26.6.5",
     "@typescript/native": "npm:typescript@^7.0.2",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vitest": "^5.0.5"
+    "vite-plus": "catalog:"
   },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
