@@ -50,5 +50,9 @@ jobs:
           git config --global user.name "create-mercury smoke"
           git config --global user.email "smoke@create-mercury.invalid"
       - run: cli/scripts/smoke.sh
-      - run: npm publish --provenance --access public
+      - name: Pack and publish
+        run: |
+          version=$(node -p "require('./package.json').version")
+          pnpm pack --pack-destination "$RUNNER_TEMP"
+          npm publish "$RUNNER_TEMP/create-mercury-$version.tgz" --provenance --access public
         working-directory: cli

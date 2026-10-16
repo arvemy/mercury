@@ -6,11 +6,12 @@
     "build": "turbo build",
     "dev": "docker compose up -d --wait db && pnpm db:migrate && turbo dev",
     "dev:apps": "turbo dev",
-    "lint": "oxlint --disable-nested-config",
+    "check": "vp check",
+    "lint": "vp lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "format": "oxfmt --disable-nested-config",
-    "format:check": "oxfmt --check --disable-nested-config",
+    "format": "vp fmt",
+    "format:check": "vp fmt --check",
     "start": "turbo start",
     "prod": "docker compose --profile prod up --build --wait",
     "prod:down": "docker compose --profile prod down",
@@ -24,10 +25,9 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "oxfmt": "^0.73.0",
-    "oxlint": "^1.88.0",
     "turbo": "^2.11.8",
-    "typescript": "npm:@typescript/typescript6@^6.0.2"
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite-plus": "catalog:"
   },
   "packageManager": "pnpm@10.34.6",
   "engines": {
@@ -35,9 +35,9 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs,cjs}": [
-      "oxlint --fix --no-error-on-unmatched-pattern",
-      "oxfmt --no-error-on-unmatched-pattern"
+      "vp lint --fix --no-error-on-unmatched-pattern",
+      "vp fmt --no-error-on-unmatched-pattern"
     ],
-    "*.{css,json,md,yml,yaml}": "oxfmt --no-error-on-unmatched-pattern"
+    "*.{css,json,md,yml,yaml}": "vp fmt --no-error-on-unmatched-pattern"
   }
 }

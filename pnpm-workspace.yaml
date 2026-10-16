@@ -9,3 +9,14 @@ allowBuilds:
 
 overrides:
   "@esbuild-kit/core-utils>esbuild": ^0.25.0
+  vite@*: "catalog:"
+  vitest@*: "catalog:"
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.2.0
+  vite-plus: 1.2.0
+  vitest: 5.0.4
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: "*"

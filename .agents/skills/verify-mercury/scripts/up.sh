@@ -47,7 +47,7 @@ psql -q -h 127.0.0.1 -p "$PG_PORT" -U postgres -d postgres -c 'create database a
   exec setsid node_modules/.bin/tsx watch src/index.ts) > "$RUN/logs/api.log" 2>&1 < /dev/null &
 API_PGID=$!
 (cd "$REPO/apps/web" && VERIFY_API_PORT=$API_PORT \
-  exec setsid node_modules/.bin/vite --config "$SKILL_DIR/scripts/vite.verify.config.mts" \
+  exec setsid node_modules/.bin/vp dev --config "$SKILL_DIR/scripts/vite.verify.config.mts" \
   --host 127.0.0.1 --port "$WEB_PORT" --strictPort) > "$RUN/logs/web.log" 2>&1 < /dev/null &
 WEB_PGID=$!
 write_state

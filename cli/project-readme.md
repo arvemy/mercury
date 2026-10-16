@@ -24,7 +24,20 @@ The todos page is a worked example of the full path from schema to screen. Delet
 | `apps/api`    | Hono on Node, with Drizzle ORM on PostgreSQL and zod validation                                    |
 | `packages/ui` | Shared Mantine theme configuration and custom components                                           |
 
-Vitest, Oxlint, Oxfmt, a husky pre-commit hook, and a GitHub Actions workflow are set up.
+Vite+ 1.2.0 provides Vite, Vitest, Oxlint, and Oxfmt. A husky pre-commit hook
+and a GitHub Actions workflow are set up. The workspace catalog pins Vite+,
+and `packageManager` selects pnpm for its package-management commands.
+
+No global Vite+ installation is required. After `pnpm install`, use
+`pnpm exec vp check` for format, lint, and type checks. `pnpm exec vp test`
+runs all test projects. API tests need `DATABASE_URL` pointing to a migrated test
+database.
+
+`pnpm exec vp run dev` runs the full development script. To start only the Vite
+dev server, use `pnpm exec vp -C apps/web dev`. `pnpm exec vp run build` builds
+every package in dependency order through Turborepo. Built-in `vp test` runs
+Vitest, while `vp run test` runs the project's test script. See the
+[Vite+ command guide](https://viteplus.dev/guide).
 
 ## Scripts
 
@@ -38,6 +51,7 @@ Run these from the project root.
 | `pnpm prod:down`   | Stop the production stack                                                     |
 | `pnpm build`       | Build every package                                                           |
 | `pnpm test`        | Run the Vitest suites                                                         |
+| `pnpm check`       | Check formatting, lint rules, and types with Vite+                            |
 | `pnpm lint`        | Lint the repo with Oxlint                                                     |
 | `pnpm typecheck`   | Typecheck every package                                                       |
 | `pnpm format`      | Format the repo with Oxfmt                                                    |

@@ -12,7 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "test": "vitest run"
+    "test": "vp test run"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",
@@ -29,7 +29,7 @@
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vitest": "^5.0.5"
+    "vite-plus": "catalog:"
   },
   "exports": {
     ".": {
