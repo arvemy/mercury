@@ -56,12 +56,28 @@ describe("withoutCliWorkspace", () => {
 
 describe("snapshot", () => {
   it("produces the same template on every run, with no cli importer", () => {
+    const sourceLock = fs.readFileSync(
+      path.join(repoRoot, "pnpm-lock.yaml"),
+      "utf8"
+    )
     const out = fs.mkdtempSync(path.join(os.tmpdir(), "mercury-snapshot-"))
     const first = path.join(out, "first")
     const second = path.join(out, "second")
     snapshot(repoRoot, first)
     snapshot(repoRoot, second)
     snapshot(repoRoot, second)
+
+    const expectedLockBlocks = sourceLock
+      .split("\n\n")
+      .filter((block) => !block.startsWith("  cli:\n"))
+    for (const dir of [first, second]) {
+      expect(
+        fs.readFileSync(path.join(dir, "pnpm-lock.yaml"), "utf8").split("\n\n")
+      ).toEqual(expectedLockBlocks)
+    }
+    expect(fs.readFileSync(path.join(repoRoot, "pnpm-lock.yaml"), "utf8")).toBe(
+      sourceLock
+    )
 
     const files = listFiles(first)
     expect(listFiles(second)).toEqual(files)
