@@ -12,23 +12,15 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment: release
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: app
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    timeout-minutes: 30
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
       TURBO_TELEMETRY_DISABLED: 1
+      WRANGLER_SEND_METRICS: "false"
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      NEON_BRANCH_ID: ${{ vars.NEON_BRANCH_ID }}
+      NEON_DATABASE_NAME: ${{ vars.NEON_DATABASE_NAME }}
+      NEON_ROLE_NAME: ${{ vars.NEON_ROLE_NAME }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Check the tag matches the CLI version
@@ -38,6 +30,12 @@ jobs:
             echo "Tag $GITHUB_REF_NAME does not match cli/package.json version $version"
             exit 1
           fi
+      - name: Check live integration configuration
+        run: |
+          node --input-type=module <<'NODE'
+          import { integrationConfig } from './scripts/neon-test-branch.mjs';
+          integrationConfig();
+          NODE
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -49,10 +47,31 @@ jobs:
       - run: |
           git config --global user.name "create-mercury smoke"
           git config --global user.email "smoke@create-mercury.invalid"
-      - run: cli/scripts/smoke.sh
-      - name: Pack and publish
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Verify real Neon Auth and database integration
+        run: pnpm test:integration
+      - name: Sanitize integration evidence
+        if: always()
         run: |
-          version=$(node -p "require('./package.json').version")
-          pnpm pack --pack-destination "$RUNNER_TEMP"
+          node --input-type=module <<'NODE'
+          import { sanitizeIntegrationEvidence } from './scripts/integration.mjs';
+          import path from 'node:path';
+          await sanitizeIntegrationEvidence({ outputDir: path.join(process.env.RUNNER_TEMP, 'release-integration-evidence') });
+          NODE
+      - name: Keep sanitized integration evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-integration-evidence
+          path: ${{ runner.temp }}/release-integration-evidence
+          if-no-files-found: warn
+      - name: Pack the tagged artifact
+        run: pnpm --dir cli pack --pack-destination "$RUNNER_TEMP"
+      - name: Verify the packed artifact
+        run: |
+          version=$(node -p "require('./cli/package.json').version")
+          cli/scripts/smoke.sh "$RUNNER_TEMP/create-mercury-$version.tgz"
+      - name: Publish the verified artifact
+        run: |
+          version=$(node -p "require('./cli/package.json').version")
           npm publish "$RUNNER_TEMP/create-mercury-$version.tgz" --provenance --access public
-        working-directory: cli

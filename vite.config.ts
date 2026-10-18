@@ -25,6 +25,8 @@ export default defineConfig({
       "skills-lock.json",
       "apps/web/src/routeTree.gen.ts",
       "cli/template/",
+      ".cloudflare/",
+      ".audit/",
     ],
   },
   lint: {
@@ -37,6 +39,8 @@ export default defineConfig({
       ".agents/",
       ".claude/",
       "apps/web/src/routeTree.gen.ts",
+      "**/.cloudflare/**",
+      ".audit/",
     ],
     rules: {
       "no-array-constructor": "error",

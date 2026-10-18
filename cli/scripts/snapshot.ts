@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url"
 import { renameDotfiles } from "../src/scaffold.js"
 
 export const EXCLUDED = [
+  ".audit/",
+  "docs/",
   ".agents/skills/verify/",
   ".agents/skills/verify-create-mercury/",
   ".agents/skills/verify-mercury/",

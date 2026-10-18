@@ -30,6 +30,6 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Operating system, Node.js version (node -v), pnpm version (pnpm -v), and Docker version if the database is involved.
+      description: Operating system, Node.js version (node -v), pnpm version (pnpm -v), Cloudflare tooling version, and whether the failure is local, staging, or production.
     validations:
       required: true

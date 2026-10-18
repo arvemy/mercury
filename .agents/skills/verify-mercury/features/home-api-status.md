@@ -1,32 +1,19 @@
-# Home and API status
+# Public home and API status
 
-The home page greets the user and shows whether the backend is reachable. The line reads `API: ok` when `/api/health` responds, `API: ...` while it loads, and `API: unreachable` once the request has failed.
+`/` renders the public home page. Its API status reads the real Worker's `/api/health` response.
 
 ## Sub-features
 
-- `home-render` shows the heading `Project ready!`, the intro text, and a demo `Button`.
-- `home-api-ok` shows `API: ok` when the API is healthy.
-- `home-api-unreachable` shows `API: unreachable` when the API is down.
+The public built Worker check covers SPA responses and health HTTP 200. The live browser run confirms `API: ok` without a signed-in session and saves home screenshots.
 
-## How to get to it (user POV)
+## How to get to it
 
-- Open `/`.
-- Choose `Home` in the top nav from any page.
+Open `/` or choose Home in the navigation.
 
-## Driving it with drive.py
+## Drive and inspect
 
-Preconditions:
+Run `.agents/skills/verify-mercury/scripts/run.sh --public` for built HTTP proof. Run the same helper without `--public` for browser proof. Inspect `.audit/worker-smoke/checks.log` and the live run's `browser/00-home-light.png` and ARIA snapshot.
 
-- A fresh `up.sh` run. `doctor.sh` is all `ok` for the healthy checks.
+## Limits
 
-- **Render and healthy status.** Run `$S/drive.py home 'goto /' 'expect heading "Project ready!"' 'expect button Button' 'expect-text "API: ok"' 'shot healthy'`.
-  `network.log` shows `GET /api/health` with status 200.
-- **Via nav.** Run `$S/drive.py home-nav 'goto /todos' 'click link Home' 'expect-url /' 'expect-text "API: ok"'`.
-- **Unreachable.** Do this last, because it breaks the run. Stop only this run's API with `source $VERIFY_RUN/state.env; kill -TERM -- -$API_PGID`. Then run `$S/drive.py home-unreachable 'goto /' 'expect-text "API: unreachable"' 'shot unreachable'`.
-  `doctor.sh` now reports `FAIL API process group ... is gone` and a 502 through the proxy. Afterward, run `down.sh`. There is no in-place API restart.
-
-## Gotchas
-
-- `API: unreachable` appears only after React Query's 3 retries, about 7s. `drive.py`'s 15s timeout covers that. Don't lower it.
-- With the API down, Vite's proxy returns 502 and logs `http proxy error` in `logs/web.log`. That is expected.
-- The `Button` on the home page does nothing. It is a Mantine demo, so don't verify a click result.
+The API and frontend share one Worker. The retired separate-API kill recipe no longer applies. To test an unreachable remote service, introduce a real failure in the owned verification environment and add an assertion for the resulting behavior. Do not mock Neon Auth or substitute a successful health response.

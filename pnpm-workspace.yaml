@@ -7,6 +7,9 @@ allowBuilds:
   esbuild: true
   msw: false
 
+patchedDependencies:
+  miniflare@5.20261012.0-beta: patches/miniflare@5.20261012.0-beta.patch
+
 overrides:
   "@esbuild-kit/core-utils>esbuild": ^0.25.0
   vite@*: "catalog:"

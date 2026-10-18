@@ -15,6 +15,12 @@ dist-ssr
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+.dev.vars*
+!.dev.vars.example
+.cloudflare/
+.wrangler/
+.neon
+.audit/
 
 # turbo
 .turbo

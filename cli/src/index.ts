@@ -23,7 +23,7 @@ async function askProjectName(): Promise<ProjectName> {
       try {
         return parseProjectName(answer)
       } catch (error) {
-        console.error((error as Error).message)
+        console.error(error instanceof Error ? error.message : String(error))
       }
     }
   } finally {
@@ -88,11 +88,14 @@ async function main() {
 Done. Next steps:
 
   cd ${projectName}
-  pnpm dev
+
+  Follow README.md to connect Neon Postgres and Neon Auth.
+  Fill apps/api/.env, apps/web/.env.local, and apps/web/.dev.vars.
+  After setup, run pnpm dev.
 `)
 }
 
-main().catch((error: Error) => {
-  console.error(error.message)
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : String(error))
   process.exit(1)
 })

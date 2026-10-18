@@ -5,44 +5,47 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/web/cloudflare.config.ts",
+        "$TURBO_ROOT$/apps/web/.cloudflare/types/index.d.ts"
+      ],
+      "outputs": ["dist/**", ".cloudflare/output/**"],
+      "env": [
+        "APP_ORIGIN",
+        "HYPERDRIVE_ID",
+        "CLOUDFLARE_CUSTOM_DOMAIN",
+        "NEON_AUTH_BASE_URL"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true,
-      "env": ["DATABASE_URL", "PORT"]
-    },
-    "start": {
-      "dependsOn": ["build"],
-      "cache": false,
-      "persistent": true,
-      "env": ["DATABASE_URL", "PORT"]
+      "dependsOn": ["^typecheck"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/web/cloudflare.config.ts",
+        "$TURBO_ROOT$/apps/web/.cloudflare/types/index.d.ts"
+      ]
     },
     "db:generate": {
       "cache": false,
-      "env": ["DATABASE_URL", "PORT"]
+      "env": ["DATABASE_URL"]
     },
     "db:migrate": {
       "cache": false,
-      "env": ["DATABASE_URL", "PORT"]
-    },
-    "db:push": {
-      "cache": false,
-      "env": ["DATABASE_URL", "PORT"]
-    },
-    "db:studio": {
-      "cache": false,
-      "persistent": true,
-      "env": ["DATABASE_URL", "PORT"]
+      "env": ["DATABASE_URL"]
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "env": ["DATABASE_URL"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/web/cloudflare.config.ts"
+      ]
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": ["TEST_DATABASE_URL"]
     }
-  }
+  },
+  "globalDependencies": ["apps/web/cloudflare.config.ts"]
 }

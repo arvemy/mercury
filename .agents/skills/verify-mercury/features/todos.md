@@ -1,41 +1,19 @@
-# Todos
+# Private todos
 
-The Todos page lists saved todos and lets a user add one by typing a title and pressing Add. The list refreshes from the server afterward, and the input clears. Blank titles are ignored.
+A signed-in user creates a trimmed title and sees only todos owned by that Neon Auth user. Signing out removes access.
 
 ## Sub-features
 
-- `todos-empty` shows `No todos yet.` when there are no rows.
-- `todos-add` saves a trimmed title, clears the input, and shows the new item in the list.
-- `todos-blank` does nothing, and sends no request, when the title is empty or only whitespace.
-- `todos-persist` shows saved todos again after a reload, because the list comes from the DB.
+The live suite covers anonymous protection, the empty todo form for a fresh user, adding a trimmed title through Add, clearing the input, persistence after reload, a second user's isolation, the real Neon row's `ownerId`, and sign-out. The API suite covers blank titles, malformed payloads, and attempts to supply ownership.
 
-## How to get to it (user POV)
+## How to get to it
 
-- Choose `Todos` in the top nav from any page.
-- Open `/todos` directly.
-- Submit the form either by choosing `Add` or by pressing `Enter` in the `New todo` textbox.
+Open `/todos` or choose Todos in the navigation. A signed-out visitor goes to Neon Auth sign-in. After signing in, use New todo and Add.
 
-## Driving it with drive.py
+## Drive and inspect
 
-Preconditions:
+Run `.agents/skills/verify-mercury/scripts/run.sh` with the Neon Postgres and Neon Auth test configuration from the parent skill. Inspect `browser/02-owner-before`, `03-owner-after`, `04-owner-reloaded`, `05-other-user`, and `06-signed-out` PNG and ARIA files. `checks.log` records POST 201 and cross-user isolation. `database.json` must have exactly the created title and its creator's Neon Auth ID.
 
-- A fresh `up.sh` run, with `doctor.sh` reporting `todos table has 0 rows`.
+## Limits
 
-- **Empty state.** Run `$S/drive.py todos-empty 'goto /' 'click link Todos' 'expect-url /todos' 'expect heading Todos' 'expect-text "No todos yet."' 'shot empty'`.
-- **Add, trim, and Enter.** Run `$S/drive.py todos-add 'goto /todos' 'fill textbox "New todo" "  Buy milk  "' 'shot typed' 'wait-response POST /api/todos && click button Add' 'expect-text "Buy milk"' 'expect-no-text "No todos yet."' 'expect-value textbox "New todo" ""' 'shot added' 'fill textbox "New todo" "Walk dog"' 'wait-response POST /api/todos && press Enter' 'expect-text "Walk dog"' 'shot added-enter'`.
-  `steps.log` shows `POST /api/todos -> 201` twice. In `network.log`, the first POST's request is `{"title":"Buy milk"}`, which proves the trim.
-- **Blank ignored.** Run `$S/drive.py todos-blank 'goto /todos' 'click button Add' 'fill textbox "New todo" "   "' 'click button Add' 'press Enter' 'expect-value textbox "New todo" "   "' 'shot after'`.
-  This covers an empty and a whitespace-only title. Then `grep -c '"POST"' $VERIFY_RUN/evidence/todos-blank/network.log` prints `0`.
-- **Persist.** Run `$S/drive.py todos-persist 'goto /todos' 'expect-text "Buy milk"' 'expect-text "Walk dog"' 'expect-no-text done' 'shot reloaded'`. A new browser session proves the list came from the server.
-- **DB side effect.** Run `$S/sql.sh todos-persist 'select id, title, length(title) as len, completed from todos order by id'`.
-  It shows `1 | Buy milk | 8 | f` and `2 | Walk dog | 8 | f`. The length of 8 proves the trimmed title was stored.
-
-## Gotchas
-
-- `expect-text` is an exact, full-text match. List items render the title alone, and the text `done` appears as a separate span only when `completed` is true.
-- The UI cannot mark a todo complete, and `POST /api/todos` ignores `completed`: the API accepts only `title`. Every todo created here shows no `done` label.
-- The API also trims titles and rejects a whitespace-only title with 400, so the browser and the API agree.
-- A failed POST shows `Couldn't add the todo. Try again.` as an alert under the form and keeps the typed title in the input.
-- There is no delete in the UI or the API. To get back to an empty list, run `down.sh` and then `up.sh`.
-- `Add` stays disabled until the POST and the list refetch after it both finish. Use `wait-response` rather than asserting the disabled state, and follow it with an `expect-text` for the new item before the next submit.
-- The TanStack Router and Query devtools buttons sit in the bottom corners in dev. They appear in ARIA snapshots and screenshots. Ignore them.
+The UI has no delete or completion control. Never reset a shared database to obtain an empty state. The run creates fresh users and deletes only its own branch afterward. Add a browser assertion in `scripts/neon-auth-e2e.mjs` when a change introduces another user entry point, such as Enter submission or a new edit control.

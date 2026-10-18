@@ -16,4 +16,6 @@ Object.defineProperty(window, "matchMedia", {
   })),
 })
 
+window.scrollTo = vi.fn()
+
 afterEach(cleanup)

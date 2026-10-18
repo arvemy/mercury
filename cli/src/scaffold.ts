@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 
@@ -89,14 +90,39 @@ export function scaffold({
     )
   }
 
+  const cloudflareConfig = path.join(targetDir, "apps/web/cloudflare.config.ts")
+  if (fs.existsSync(cloudflareConfig)) {
+    const slug = projectName
+      .replace(/[^a-z0-9-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/-+$/, "")
+    const workerName =
+      slug === projectName && slug.length <= 52
+        ? slug
+        : `${slug.slice(0, 43).replace(/-+$/, "")}-${createHash("sha256").update(projectName).digest("hex").slice(0, 8)}`
+    const config = fs.readFileSync(cloudflareConfig, "utf8")
+    fs.writeFileSync(
+      cloudflareConfig,
+      config.replace(
+        'const projectName = "mercury"',
+        `const projectName = ${JSON.stringify(workerName)}`
+      )
+    )
+  }
+
   const readme = path.join(targetDir, "README.md")
   if (fs.existsSync(readme)) {
     const text = fs.readFileSync(readme, "utf8")
     fs.writeFileSync(readme, text.replace(/^# .*$/m, `# ${projectName}`))
   }
 
-  const envExample = path.join(targetDir, "apps/api/.env.example")
-  if (fs.existsSync(envExample)) {
-    fs.copyFileSync(envExample, path.join(targetDir, "apps/api/.env"))
+  for (const [example, target] of [
+    ["apps/api/.env.example", "apps/api/.env"],
+    ["apps/web/.env.example", "apps/web/.env.local"],
+    ["apps/web/.dev.vars.example", "apps/web/.dev.vars"],
+  ]) {
+    const source = path.join(targetDir, example)
+    if (fs.existsSync(source))
+      fs.copyFileSync(source, path.join(targetDir, target))
   }
 }

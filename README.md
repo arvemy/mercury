@@ -4,90 +4,69 @@
 [![CI](https://github.com/arvemy/mercury/actions/workflows/ci.yml/badge.svg)](https://github.com/arvemy/mercury/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
-An opinionated TypeScript full-stack starter. React, Hono, and PostgreSQL, powered by Vite+, pnpm, and Turborepo.
-
-```sh
-pnpm create mercury my-app
-```
-
-One command gives you a working monorepo with a typed API, a database, a UI kit, tests, CI, and agent skills. There are no options to choose from. Every project starts from the same tested stack.
-
-## Quick start
-
-You need Node.js 22.22, 24.15, or 26 or later, pnpm 10, and Docker for the local database.
+A TypeScript starter with React and Hono in one Cloudflare Worker. Static Assets serve the web app, Neon Postgres stores data through Hyperdrive and Drizzle, and Neon Auth protects each user's todos.
 
 ```sh
 pnpm create mercury my-app
 cd my-app
-pnpm dev
 ```
 
-`pnpm dev` starts PostgreSQL in Docker, applies migrations, and runs the web app at http://localhost:5173 and the API at http://localhost:3000. Leave out `my-app` to be asked for a name.
+You need Node.js 22.22.2, 24.15.0, or 26 or later, and pnpm 10. Creating and installing a project needs no cloud credentials.
 
-`create-mercury` copies the template, names the project, writes `apps/api/.env`, installs dependencies, and makes the first commit on `main`.
+The CLI copies local environment examples and installs dependencies. Before running `pnpm dev`, install the [official Neon CLI](https://neon.com/docs/cli/install) and link your development project from the project root:
+
+```sh
+neon init --services postgres,auth
+neon deploy
+```
+
+The root `neon.ts` enables managed Neon Auth. Neon pulls the branch's database and Auth values into root `.env.local` or `.env`. The [project setup guide](cli/project-readme.md#connect-development-services) covers sign-in, the restricted runtime connection, the cookie secret, and deployment.
 
 ## What you get
 
-| Layer    | Tools                                                                                                    |
-| -------- | -------------------------------------------------------------------------------------------------------- |
-| Web      | React 19, Vite+, TanStack Router with file-based routes, TanStack Query                                  |
-| API      | Hono on Node, zod validation, a Hono RPC client typed end to end from the API to the web app             |
-| Database | PostgreSQL 18 in Docker Compose, Drizzle ORM and migrations                                              |
-| UI       | Mantine 9 components, shared theme configuration, and Tabler Icons                                       |
-| Quality  | TypeScript 7, Vitest, Oxlint, Oxfmt, a husky and lint-staged pre-commit hook                             |
-| Build    | pnpm workspaces and Turborepo                                                                            |
-| Deploy   | Separate production images for the web app (Caddy) and the API (Node), and a Compose `prod` profile      |
-| CI       | A GitHub Actions workflow that lints, typechecks, builds, migrates, tests, and runs the production stack |
-| Agents   | Skills for the stack in `.agents/skills`, linked for Claude Code                                         |
+| Layer          | Tools                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Web            | React, Vite+, TanStack Router, and TanStack Query.                                                   |
+| API            | Hono in the same Cloudflare Worker, with a typed RPC client and zod validation.                      |
+| Database       | Neon Postgres through Hyperdrive, `pg`, Drizzle's `node-postgres` adapter, and committed migrations. |
+| Authentication | Neon Auth sign-in and private todos with server-derived ownership.                                   |
+| UI             | Mantine, a shared theme, and Tabler Icons.                                                           |
+| Quality        | TypeScript, Vitest, Oxlint, Oxfmt, and a pre-commit hook.                                            |
+| Delivery       | Two named Workers for staging and production, custom domains, and Workers Builds.                    |
+| Verification   | Credential-free checks plus live Neon Auth, database, and deployed Worker suites.                    |
+| Agents         | Stack skills in `.agents/skills`, linked for Claude Code.                                            |
 
-`pnpm prod` builds both images and runs the stack like production at http://localhost:8080.
+The browser calls same-origin `/api/auth/*` through the official Neon SDK. `/` and `/api/health` are public. `/todos` requires sign-in. Anonymous todo API requests receive JSON with HTTP 401. The API assigns each todo to the verified Neon Auth user and filters reads by that owner.
 
-A todos page shows the full path from schema to migration to API route to typed client to page. Delete it once you have your own.
-
-## Project layout
-
-```text
-my-app/
-├── apps/
-│   ├── api/        Hono API, Drizzle schema and migrations
-│   └── web/        React app, routes, and queries
-├── packages/
-│   └── ui/         Shared Mantine theme and custom components
-├── .agents/skills/ Skills for coding agents
-└── docker-compose.yml
-```
-
-The generated project has its own README with scripts and how each part works.
-
-Vite+ 1.2.0 is pinned in the workspace catalog. No global installation is required.
-After `pnpm install`, run `pnpm exec vp check` for format, lint, and type checks,
-or `pnpm exec vp test` for all test projects. API tests need `DATABASE_URL` pointing
-to a migrated test database.
-
-Use `pnpm exec vp run dev` for the full development script, including the database
-and API. `pnpm exec vp -C apps/web dev` starts only the Vite dev server.
-`pnpm exec vp run build` builds the workspace through Turborepo, preserving
-dependency order and TypeScript declarations. Built-in `vp test` runs Vitest,
-while `vp run test` runs the workspace's test script. See the
-[Vite+ command guide](https://viteplus.dev/guide).
-
-Mantine uses its native theme system and follows the system color scheme by default. Customize the shared theme in `packages/ui/src/theme.ts` and import standard components from `@mantine/core`.
-
-The project includes the official `mantine-combobox`, `mantine-form`, and `mantine-custom-components` agent skills. Mantine's [LLM documentation](https://mantine.dev/llms.txt) covers components, hooks, theming, and styling. `.mcp.json` registers [Mantine's MCP server](https://mantine.dev/guides/llms/) for Claude Code.
+Development and staging use separate branches in a nonproduction Neon project. Production uses a separate Neon project. Each environment has its own restricted runtime role, branch-specific Neon Auth URL, and random cookie secret. Staging and production have separate Hyperdrive configurations, Workers, and custom domains. Migration commands use a separate database-owner credential. Generic branch previews are disabled.
 
 ## Work on Mercury
 
-This repository is the template. The root is a working Mercury app, and `cli/` holds `create-mercury`, which packs a snapshot of the root.
+This repository is both the working template app and the source of `create-mercury`.
 
-- `pnpm dev`, `pnpm test`, and the other root scripts run the template app.
-- `cli/scripts/next-steps.sh` creates a project and runs the next steps the CLI prints, then checks that the app answers. It needs Docker.
-- `cli/scripts/smoke.sh` packs the CLI, creates a project from the tarball, and runs its migrations, format check, lint, typecheck, build, and tests. Set `DATABASE_URL` first.
-- `cli/scripts/snapshot.ts` decides what ships. Repo-only files go in its `EXCLUDED` list. From `.github/`, only `workflows/ci.yml` ships.
-- `cli/project-readme.md` is the README that generated projects get.
-- The `verify-mercury` and `verify-create-mercury` skills drive the real app and the real CLI for end-to-end checks. The `verify` skill picks the right one for a change.
+```sh
+pnpm install
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:worker
+```
 
-Releases publish from a `v*` tag through `.github/workflows/release.yml` with npm trusted publishing. The tag must match the version in `cli/package.json`.
+These checks need no cloud credentials. `pnpm test:integration` requires an isolated nonproduction Neon project with management API access. It configures Auth only on an owned temporary branch, registers users through the UI, proves cookie sessions and ownership, and deletes that branch with its users. `pnpm test:deployed` deploys an owned temporary Worker and Hyperdrive configuration, verifies the app over HTTPS on `workers.dev`, and deletes its resources. Email delivery, custom-domain DNS, and TLS need separate checks with your inbox and domain. If the process is killed, remove only the owned resource IDs recorded in its evidence directory. The [project guide](cli/project-readme.md#run-checks) lists the required variables.
+
+- `cli/src` creates projects, and `cli/scripts/snapshot.ts` selects the git-tracked template files.
+- `cli/project-readme.md` becomes the README in generated projects.
+- `cli/scripts/smoke.sh` packs the CLI, creates a project from the tarball, and checks the generated app without cloud credentials. Pass a tarball path to verify an already packed artifact.
+- `cli/scripts/next-steps.sh` checks the printed setup instructions and the actionable failure from unconfigured development startup.
+- Only `.github/workflows/ci.yml` ships from `.github`. The release and CLI workflows belong to this repository.
+- The `verify` skill selects the app or CLI driver. App verification uses the real Worker, Neon, and Neon Auth. CLI verification drives the packed tarball in a terminal.
+
+New template files must be tracked, or marked with `git add -N`, before packing. Repository-only `.audit`, `docs`, CLI source, and verification skills stay out of generated projects.
+
+Releases come from a `v*` tag matching `cli/package.json`. The protected `release` environment requires `pnpm test:integration` to pass for real Neon Postgres and Neon Auth before the workflow packs, smoke-checks, and publishes the tagged tarball. npm trusted publishing publishes that same tarball with provenance. Configure the protected `integration` and `release` environments as described in the [contributor guide](.github/CONTRIBUTING.md#configure-trusted-live-tests). Missing live-test configuration blocks a release.
 
 ## License
 
-[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for the copyright notice.
+[Apache License 2.0](LICENSE). See [NOTICE](NOTICE).

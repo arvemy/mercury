@@ -1,38 +1,19 @@
 # Color scheme
 
-The app uses Mantine's native color-scheme system. It follows the system preference by default and reads saved preferences from `localStorage["mantine-color-scheme-value"]`.
+Mantine follows the system color scheme until `mantine-color-scheme-value` in localStorage contains a saved choice.
 
 ## Sub-features
 
-- `scheme-system` renders the system color scheme when no Mantine preference is saved.
-- `scheme-persist` applies a saved Mantine preference across navigation and reloads.
+The live browser runner opens a light browser context, confirms the HTML `data-mantine-color-scheme` is `light`, saves a `dark` preference, reloads, and confirms `dark`.
 
-## How to get to it (user POV)
+## How to get to it
 
-- Open any page. Its colors follow your system preference.
-- Components can use `useMantineColorScheme` to change or clear the saved preference.
+Open `/`. Components use `useMantineColorScheme` to save or clear the native preference.
 
-## Driving it with drive.py
+## Drive and inspect
 
-Preconditions:
+Run `.agents/skills/verify-mercury/scripts/run.sh` with the required live credentials. Compare `browser/00-home-light.png` and `browser/00-home-dark.png`, their ARIA snapshots, and the passing runner assertions.
 
-- A fresh `up.sh` run with `doctor.sh` all `ok`.
-- Each `drive.py` call opens a browser with empty localStorage and a light system preference.
+## Limits
 
-- **System default.** Run:
-
-  ```
-  $S/drive.py scheme-system 'goto /' 'expect-js "document.documentElement.getAttribute(\"data-mantine-color-scheme\")" light' 'expect-js "localStorage.getItem(\"mantine-color-scheme-value\")" null' 'shot system-light'
-  ```
-
-- **Saved preference.** Seed Mantine's native storage key to exercise the provider's startup behavior:
-
-  ```
-  $S/drive.py scheme-persist 'goto /' 'expect-js "(localStorage.setItem(\"mantine-color-scheme-value\", \"dark\"), localStorage.getItem(\"mantine-color-scheme-value\"))" dark' 'goto /' 'expect-js "document.documentElement.getAttribute(\"data-mantine-color-scheme\")" dark' 'shot home-dark' 'click link Todos' 'expect-url /todos' 'expect-js "document.documentElement.getAttribute(\"data-mantine-color-scheme\")" dark' 'goto /todos' 'expect-js "document.documentElement.getAttribute(\"data-mantine-color-scheme\")" dark' 'shot todos-dark-after-reload'
-  ```
-
-## Gotchas
-
-- Mantine applies `data-mantine-color-scheme` to `<html>`. Read that attribute when checking the effective scheme.
-- `defaultColorScheme="auto"` follows `prefers-color-scheme` until an explicit Mantine preference is saved.
-- To exercise live system changes, use Playwright's color-scheme emulation. The step runner defaults to a light system preference.
+The test writes Mantine's native storage key to exercise startup behavior. The starter has no separate color-scheme control. If a control is added, drive that control and verify persistence through a reload.

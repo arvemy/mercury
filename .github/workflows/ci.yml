@@ -2,8 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, staging]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,23 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         node: [22, 24, 26]
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: app
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
       TURBO_TELEMETRY_DISABLED: 1
+      WRANGLER_SEND_METRICS: "false"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -48,9 +35,9 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm build
-      - run: pnpm db:migrate
       - run: pnpm test
+      - run: pnpm build
+      - run: pnpm test:worker
 
   ci:
     if: always()
@@ -59,45 +46,42 @@ jobs:
     steps:
       - run: test "${{ needs.checks.result }}" = success
 
-  docker:
+  integration:
+    name: real Neon Auth and database integration
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && vars.RUN_LIVE_INTEGRATION == 'true')
+    needs: checks
     runs-on: ubuntu-latest
+    environment: integration
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+      NEON_BRANCH_ID: ${{ vars.NEON_BRANCH_ID }}
+      NEON_DATABASE_NAME: ${{ vars.NEON_DATABASE_NAME }}
+      NEON_ROLE_NAME: ${{ vars.NEON_ROLE_NAME }}
+      TURBO_TELEMETRY_DISABLED: 1
+      WRANGLER_SEND_METRICS: "false"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Start the production stack
-        run: docker compose --profile prod up --build --wait
-      - name: Check migrations
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:integration
+      - name: Sanitize integration evidence
+        if: always()
         run: |
-          test "$(docker inspect -f '{{.State.ExitCode}}' "$(docker compose ps -a -q migrate)")" = 0
-          docker compose --profile prod run --rm migrate
-      - name: Check the containers
-        run: |
-          for service in api web; do
-            test "$(docker compose exec -T "$service" id -u)" != 0
-          done
-          if curl -s -o /dev/null localhost:3000; then
-            echo "The API must not be published on the host"
-            exit 1
-          fi
-      - name: Check the app through the web container
-        run: |
-          curl -fsS localhost:8080/ | grep -q '<div id="root">'
-          curl -fsS localhost:8080/todos | grep -q '<div id="root">'
-          asset=$(curl -fsS localhost:8080/ | grep -o '/assets/index-[^"]*\.js')
-          curl -fsSI "localhost:8080$asset" | grep -qi 'cache-control: public, max-age=31536000, immutable'
-          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/assets/missing.js)" = 404
-          test "$(curl -fsS localhost:8080/api/health)" = '{"status":"ok"}'
-          curl -fsS -X POST -H 'content-type: application/json' -d '{"title":"Ship it"}' localhost:8080/api/todos
-          curl -fsS localhost:8080/api/todos | grep -q '"title":"Ship it"'
-      - name: Check image sizes
-        run: |
-          check_size() {
-            local mb=$(( $(docker image inspect -f '{{.Size}}' "$(docker compose images -q "$1" | head -1)") / 1000000 ))
-            echo "$1 image: $mb MB (budget $2 MB)"
-            test "$mb" -le "$2"
-          }
-          check_size api 220
-          check_size web 75
-      - if: failure()
-        run: docker compose --profile prod logs
-      - if: always()
-        run: docker compose --profile prod down -v
+          node --input-type=module <<'NODE'
+          import { sanitizeIntegrationEvidence } from './scripts/integration.mjs';
+          import path from 'node:path';
+          await sanitizeIntegrationEvidence({ outputDir: path.join(process.env.RUNNER_TEMP, 'integration-evidence') });
+          NODE
+      - name: Keep integration evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: integration-evidence
+          path: ${{ runner.temp }}/integration-evidence
+          if-no-files-found: warn

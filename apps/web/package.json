@@ -21,7 +21,8 @@
     "@workspace/ui": "workspace:*",
     "hono": "^4.13.13",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "@neondatabase/auth": "0.6.0-beta"
   },
   "devDependencies": {
     "@tanstack/router-plugin": "^1.168.46",
@@ -41,6 +42,8 @@
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
     "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "cf": "1.0.0-beta.17",
+    "@cloudflare/vite-plugin": "2.0.0-beta.v.0"
   }
 }

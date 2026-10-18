@@ -1,129 +1,97 @@
 ---
 name: verify-mercury
-description: Launch and drive the real Mercury app (React web UI at / and /todos, backed by the Hono /api and Postgres) in an isolated throwaway stack, then capture screenshots, ARIA snapshots, network, and DB evidence. Use to prove a web or API change works end to end in the running app, not just in Vitest.
+description: Prove Mercury's Worker, Neon database, and managed Neon Auth through browser and HTTP checks. Use the built Worker, live session, deployed Worker, or preview transport checks for web, API, authentication, database, and deployment changes.
 ---
 
 # Verify Mercury
 
-The user-facing surface is the **web UI** (`apps/web`, Vite + React + TanStack Router). It calls the **Hono API** (`apps/api`, routes under `/api`) through Vite's `/api` proxy, and the API stores data in **Postgres** via Drizzle. The API is a secondary surface, reachable with curl.
+Read [the feature map](features/README.md), then run the matching checks from the repository root. The web app and Hono API share one Worker, the Cloudflare Vite plugin, and Hyperdrive bindings.
 
-Every run is isolated. `up.sh` creates a fresh Postgres 18 data dir, applies the repo's Drizzle migrations, and starts the API (`tsx watch`) and Vite on free ports. It never touches the `docker compose` database, `apps/api/.env`, or ports 3000/5173/5432. Concurrent runs don't collide. Never drive a server you didn't start with `up.sh`, such as the user's `pnpm dev`.
+## Select the check
 
-All helpers live in `.agents/skills/verify-mercury/scripts/`. The examples below assume `S=.agents/skills/verify-mercury/scripts`, run from the repo root.
+Run `.agents/skills/verify-mercury/scripts/run.sh` from the repository root with the matching flag.
 
-## Launch
+| Flag         | Proof                                                                                                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--public`   | Builds and previews the Worker without credentials. Checks public routes, headers, asset caching, anonymous JSON 401 responses, and 404 routing. |
+| No flag      | Runs migrations, isolated API tests, and real Neon Auth signup, signin, reload, ownership, isolation, and signout on an owned child branch.      |
+| `--deployed` | Deploys an owned HTTPS Worker and Hyperdrive configuration, then checks HTTP behavior, real Neon Auth, UI writes, and database ownership.        |
 
-```bash
-S=.agents/skills/verify-mercury/scripts
-eval "$($S/up.sh)"        # prints `export VERIFY_RUN=<run dir>`; progress goes to stderr
+## Check the built Worker without credentials
+
+```sh
+.agents/skills/verify-mercury/scripts/run.sh --public
 ```
 
-- **Ready** means `up.sh` exits 0 after printing `ready: web http://127.0.0.1:<port> ...`. It waits until `GET /api/health` answers on the API port, `/` answers on the web port, and `/api/health` answers through the web proxy (up to 60s each).
-- **First run** installs the Postgres binaries (`embedded-postgres@18.4.0-beta.17`, about 30 MB) into `~/.cache/verify-mercury/pg18`. If `node_modules` is missing, it also runs `pnpm install --frozen-lockfile`. Docker is not needed.
-- **On failure** `up.sh` tears down whatever it had started and names the logs dir. Read `$VERIFY_RUN/logs/{initdb,postgres,migrate,api,web}.log`.
-- `$VERIFY_RUN/state.env` holds `WEB_URL`, `API_URL`, `DATABASE_URL`, the ports, `API_PGID`, `WEB_PGID`, and `GIT_HEAD`. Run `source "$VERIFY_RUN/state.env"` to use them.
-- Both dev servers hot-reload source edits under `apps/`. Restart the run (`down.sh`, then `up.sh`) after changing the schema, migrations, dependencies, or `vite.config.ts`.
-- Vite loads the repo config through `scripts/vite.verify.config.mts`. This verification-only wrapper changes only the `/api` proxy target and the root, because the repo config hardcodes `localhost:3000`.
+This builds and previews the actual Worker on a free port. `scripts/verify-worker.mjs` stops only its owned process group. Evidence stays in `.audit/worker-smoke`. Authenticated Neon access needs a live check.
 
-## Doctor
+## Configure the live run
 
-```bash
-$S/doctor.sh              # uses $VERIFY_RUN; or pass the run dir
+Use a Neon management API key scoped to an isolated nonproduction project on AWS without IP Allow or Private Networking. Set `NEON_API_KEY`, `NEON_PROJECT_ID`, and `NEON_BRANCH_ID` in the process environment. Optional `NEON_DATABASE_NAME` and `NEON_ROLE_NAME` default to `neondb` and `neondb_owner`. Install Chromium with `pnpm exec playwright install chromium`. Keep credentials out of chat and evidence.
+
+```sh
+.agents/skills/verify-mercury/scripts/run.sh
 ```
 
-This check is read-only and exits 1 on any `FAIL`. It checks that:
+Missing configuration fails with the required variable names. Never replace real authentication with injected users, mocked provider endpoints, custom identity headers, bearer tokens, or fabricated session cookies as live proof.
 
-- the API and web process groups are alive;
-- each port is owned by *this run's* process group, not someone else's server;
-- Postgres is up and the `todos` table is queryable (it prints the row count);
-- `/api/health` through the web proxy returns `{"status":"ok"}`;
-- `drive.py` can find the Chromium build its Playwright version launches;
-- `HEAD` still matches the commit the run started on.
+## Drive local sessions
 
-Run it first, and again whenever a step behaves oddly. If it fails, read the logs, then `down.sh` and `up.sh`. Don't patch a half-dead run.
+`scripts/integration.mjs` creates a unique owned Neon child, records its ID, and waits for operations. It retrieves or enables that child's Auth, enables email/password, disables required email verification there, and reads the settings back. It never migrates or configures the parent. The run migrates the child and runs API tests in an isolated schema.
 
-## Drive
+Tracked app files are copied into a scratch directory with installed dependencies linked. The actual child Auth URL, database URL, and random cookie secret stay in scratch settings. A local Worker starts on a free port, then the helper trusts its exact origin only on the owned child.
 
-**Browser:** `drive.py` runs headless Chromium through Python Playwright. It is a `uv` script that declares `playwright==1.63.0` inline, so `uv` provides Playwright and no system Python package is needed. If `doctor.sh` reports the browser missing, run `uv run --with playwright==1.63.0 playwright install chromium` once. Each invocation is one fresh browser session with empty localStorage, running the steps in order and stopping at the first failure.
+`scripts/neon-auth-e2e.mjs` uses plain Playwright to register two unique users through the real signup form. It explicitly signs each user out and back in. Same-origin cookies authenticate the app. The browser captures home and color scheme states, anonymous protection, authenticated navigation, todo creation, reload restoration, second-user isolation, and signout. A direct Neon SQL query confirms the saved title and current Neon Auth user ID.
 
-```bash
-$S/drive.py <label> '<step>' '<step>' ...
-$S/drive.py --help                     # full step list
+The live run does not prove email delivery, verification codes, or password recovery. Follow the [manual real-inbox recipe](features/authentication.md#check-email-with-a-real-inbox) for those checks. Verify production SMTP separately.
+
+A `finally` block stops the owned Worker, removes scratch settings, and deletes only the recorded child branch. Branch deletion removes its test users and sessions. The branch does not expire automatically. If the process is killed, recover only resources identified in that run's evidence. Never delete by prefix or search. Never kill processes by name or port.
+
+## Drive a deployed Worker
+
+Set the same three required Neon variables, `CLOUDFLARE_ACCOUNT_ID`, and `WORKERS_DEV_SUBDOMAIN`. Use the account's existing workers.dev subdomain label, optionally ending in `.workers.dev`. Authenticate the installed Cloudflare CLI with `pnpm --dir apps/web exec cf auth login` or provide `CLOUDFLARE_API_TOKEN` in the environment.
+
+```sh
+.agents/skills/verify-mercury/scripts/run.sh --deployed
 ```
 
-| Step | Meaning |
-|---|---|
-| `goto PATH` | open `WEB_URL+PATH`, wait for network idle |
-| `click ROLE NAME` / `fill ROLE NAME VALUE` | act on an element by ARIA role + exact accessible name |
-| `press KEY` | keyboard press on the page (`Enter`, `Tab`) |
-| `expect ROLE NAME` / `expect-text TEXT` / `expect-no-text TEXT` | visibility assertions (exact match, 15s timeout) |
-| `expect-value ROLE NAME VALUE` | a form control's value |
-| `expect-url PATH` | current path |
-| `expect-js JS VALUE` | `String(JS) === VALUE`, for DOM/localStorage state |
-| `wait-response METHOD PATH && <action>` | arm a response wait around the action that triggers it; logs the status |
-| `shot NAME` | full-page PNG plus ARIA snapshot |
+This runs `pnpm test:deployed`. `scripts/verify-deployed.mjs` creates a unique Worker, a Hyperdrive configuration, and a Neon child. It checks that the Worker and Hyperdrive names are unused before creation. It records exact resource IDs as soon as they are available in `.audit/deployed-<timestamp>/owned-resources.json` and `neon-branch.json`.
 
-These handles are stable in this app:
+The runner migrates with the child owner's credentials, then creates a restricted SQL runtime role. Hyperdrive receives that role with only database connection, schema usage, and todo SELECT and INSERT grants. The runner confirms that the role has no owner privileges and cannot alter the table. Hyperdrive query caching is disabled and read back. Owner credentials never enter the build environment or generated artifact.
 
-- nav links `link Home` and `link Todos`
-- headings `heading "Project ready!"` and `heading Todos`
-- the todo input `textbox "New todo"` (placeholder `What needs doing?`) and the `button Add`
-- the text `API: ok|...|unreachable`
-- the empty-state text `No todos yet.`
+The production artifact deploys to `https://<unique-worker>.<existing-subdomain>.workers.dev` with a secret cookie key and the owned Hyperdrive binding. HTTP checks cover SPA routing, security headers, immutable hashed assets, anonymous reads and writes, and missing routes. The browser proves signup, signin, reload, todo creation, two-user isolation, and signout against that HTTPS origin. A direct Neon query confirms ownership.
 
-**API:** `api.sh <label> METHOD PATH [json]` calls through the web proxy, which is the same path the browser uses.
+The runner deletes only its owned Worker, Hyperdrive configuration, and Neon child. It requires GET readbacks with 404 after deletion and records each cleanup result. `PASS` appears only after behavior and cleanup succeed. After interruption, inspect exact resource IDs before recovery. Never repurpose or delete existing resources. This check proves workers.dev HTTPS, not custom-domain DNS or TLS.
 
-**DB:** `sql.sh <label> "<sql>"` runs the query in a read-only transaction.
+## Check repeated preview requests
 
-```bash
-$S/api.sh todos-api POST /api/todos '{"title":"Buy milk"}'
-$S/sql.sh todos-add 'select id, title, completed from todos order by id'
+Run these checks after changing the Cloudflare Vite plugin, Miniflare patch, or preview transport:
+
+```sh
+node --test scripts/preview-transport.test.mjs
+pnpm build
+pnpm test:preview-transport
 ```
 
-Feature recipes are in [`features/README.md`](features/README.md). Use the matching feature file, and cover every entry point it lists.
+The two Node tests check socket reuse, socket retirement after request bodies, uploads, streamed responses, and early authorization responses. The built preview check runs 1,000 cycles with six responses per cycle. It checks health, anonymous reads and writes, unknown API routes, and missing assets. Retain its terminal result and `.audit/preview-transport/worker.log`.
 
-## Evidence
+`pnpm-workspace.yaml` applies `patches/miniflare@5.20261012.0-beta.patch` to that exact Miniflare version. The patch retires connections after requests with bodies to mitigate the preview failure tracked in [workerd issue 7634](https://github.com/cloudflare/workerd/issues/7634). A passing Mercury check does not establish that the upstream defect is fixed. Reassess the patch and rerun these checks when upgrading Miniflare.
 
-Everything for a label goes to `$VERIFY_RUN/evidence/<label>/`:
+## Read the evidence
 
-- `steps.log`: each step and its result, including `POST /api/todos -> 201` lines.
-- `NN-<name>.png` and `NN-<name>.aria.txt` from each `shot`.
-- `FAILED.png` when a step fails.
-- `network.log`: one JSON line per `/api/*` response, with method, URL, status, request body, and response body.
-- `console.log`: browser console output and page errors.
-- `api-N.txt` and `db-N.txt` from `api.sh` and `sql.sh`.
+Local live runs write `.audit/integration-<timestamp>/`:
 
-Server logs stay in `$VERIFY_RUN/logs/`. `api.log` has Hono's request log lines (`--> POST /api/todos 201`). Report proofs by pointing at these paths.
+- `neon-branch.json` records the nonsecret project, parent, branch, and name.
+- `neon-auth.json` records the confirmed child auth mode. `neon-auth-origin.json` records the owned Worker's trusted origin.
+- `migrate.log`, `api-integration.log`, and `worker.log` record migrations, API tests, and Worker behavior with secrets redacted.
+- `browser/*.png` and `*.aria.txt` show user-visible states.
+- `browser/network.log` records method, path, and status only. Never record auth response bodies, headers, cookies, or tokens.
+- `browser/checks.log`, `database.json`, and `neon-auth-users.json` record assertions, saved ownership, and created user IDs.
+- `neon-cleanup.txt` records completed branch deletion after its operations finish.
+- `PASS` exists only after the full run and cleanup succeed.
 
-Proof standards:
+Never persist passwords, tokens, email bodies, or OTP values. Screenshots mask password and code inputs. ARIA and error evidence redact their values. The network log contains no request or response bodies.
 
-- **Drive the real user path:** click `Add` in the UI. `api.sh` is not a substitute for the UI entry point. Use it only to prove the API surface itself.
-- **Capture before and after:** shoot the state before the action, the action (`wait-response` status), and the resulting state.
-- **Verify side effects:** after a mutation, capture the row with `sql.sh`, and reload the page (`goto` again) to show it came from the server, not client cache.
-- **Mock nothing:** the stack is real end to end. The DB is disposable, so mutate freely.
-- **Check `console.log`** for `[pageerror]` lines. React Query/Router devtools noise is expected in dev.
+Deployed runs use `.audit/deployed-<timestamp>/`. Inspect `owned-resources.json`, `runtime-role.json`, `worker.config.json`, `coverage.json`, HTTP `checks.log`, `browser/`, and `cleanup-*.json`. Cloudflare command logs record resource readbacks and deletion checks with credentials redacted.
 
-## Cleanup
-
-```bash
-$S/down.sh                # uses $VERIFY_RUN; or pass the run dir. Safe to run twice.
-```
-
-`down.sh` kills only the process groups recorded in `state.env` and stops that run's Postgres with `pg_ctl`. It then deletes `$VERIFY_RUN/scratch`, which holds the DB data, and writes a `DOWN` marker.
-
-It **keeps** `$VERIFY_RUN/evidence/` and `$VERIFY_RUN/logs/`. Runs live under `~/.local/state/verify-mercury/runs/<run-id>/`. Override the location with `VERIFY_STATE_ROOT`.
-
-Never `pkill node`, `pkill vite`, or kill by port. The user may have their own dev servers running. Run `down.sh` after failed attempts too.
-
-## Helpers
-
-| Script | Purpose |
-|---|---|
-| `up.sh` | start an isolated stack and print `export VERIFY_RUN=...` |
-| `doctor.sh [run]` | read-only health and ownership check |
-| `drive.py <label> <steps...>` | browser step runner with automatic evidence |
-| `api.sh <label> METHOD PATH [json]` | curl through the web proxy and save the request and response |
-| `sql.sh <label> "<sql>"` | read-only query against the run DB and save the output |
-| `down.sh [run]` | stop this run and keep its evidence |
-| `lib.sh` | shared paths, sourced by the others |
-| `vite.verify.config.mts` | Vite config wrapper that retargets the `/api` proxy |
+Report the command, observed result, and evidence path. A public pass cannot replace missing live or deployed proof. Automated session checks cannot replace manual email proof. A failed or incomplete run is not a pass. After failure, inspect logs and cleanup before retrying. Extend the plain Playwright driver for new UI entry points. CI and release upload only sanitized, allowlisted text evidence.
