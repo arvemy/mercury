@@ -54,10 +54,13 @@ export function snapshot(repoRoot: string, templateDir: string) {
     workspacePath,
     withoutCliWorkspace(fs.readFileSync(workspacePath, "utf8"))
   )
-  execFileSync("pnpm", ["install", "--lockfile-only", "--silent"], {
-    cwd: templateDir,
-    stdio: "inherit",
-  })
+  const lockfilePath = path.join(templateDir, "pnpm-lock.yaml")
+  fs.writeFileSync(
+    lockfilePath,
+    fs
+      .readFileSync(lockfilePath, "utf8")
+      .replace(/^ {2}cli:\n(?: {4}.*\n)*\n/m, "")
+  )
 
   fs.copyFileSync(
     path.join(repoRoot, "cli/project-readme.md"),
