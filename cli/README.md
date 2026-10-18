@@ -3,32 +3,16 @@
 [![npm](https://img.shields.io/npm/v/create-mercury)](https://www.npmjs.com/package/create-mercury)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](https://github.com/arvemy/mercury/blob/main/LICENSE)
 
-Create a [Mercury](https://github.com/arvemy/mercury) project. Mercury is an opinionated TypeScript full-stack starter with React, Hono, and PostgreSQL, powered by pnpm and Turborepo.
+Create a [Mercury](https://github.com/arvemy/mercury) project with React, Hono, Cloudflare Workers and Static Assets, Neon Postgres, Drizzle, and Neon Auth.
 
 ```sh
 pnpm create mercury my-app
 ```
 
-Leave out the name to be asked for one. The name must be a valid npm package name in lowercase.
+You need Node.js 22.22.2, 24.15.0, or 26 or later, and pnpm 10. Leave out the name for an interactive prompt. Names use lowercase letters, digits, and npm-compatible punctuation.
 
-## What it does
+The CLI copies the template, names the project and page title, copies local environment examples, initializes Git on `main`, installs dependencies, and creates the first commit. It refuses a nonempty target directory. An install failure keeps the generated files and prints recovery commands.
 
-1. Copies the Mercury template into `my-app`. It refuses a directory that already has files in it.
-2. Names the project in `package.json` and the page title, and writes `apps/api/.env`.
-3. Runs `git init` on `main`, then `pnpm install`, then makes the first commit.
-4. Prints the next steps.
+Scaffolding and installation require no cloud credentials. The CLI does not provision accounts or start the app. Open the generated `README.md`, connect the development Neon branch and its managed Auth settings, fill `apps/api/.env`, `apps/web/.env.local`, and `apps/web/.dev.vars`, then run `pnpm dev`.
 
-If `pnpm install` fails, the files stay in place, and the CLI prints the commands to run again.
-
-## Next steps
-
-You need Node.js 22.22, 24.15, or 26 or later, pnpm 10, and Docker for the local database.
-
-```sh
-cd my-app
-pnpm dev
-```
-
-`pnpm dev` starts PostgreSQL in Docker, applies migrations, and runs the web app and the API.
-
-See the [Mercury README](https://github.com/arvemy/mercury#readme) for what the project includes.
+The generated README covers separate staging and production Workers, Hyperdrive configurations, branch-specific Neon Auth URLs and cookie secrets, custom domains, migrations, and real integration tests.

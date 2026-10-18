@@ -1,35 +1,19 @@
-# Navigation
+# Navigation and route protection
 
-A persistent top nav switches between Home and Todos without a full page load, highlights the active link, and every route also works as a direct deep link.
+Home stays public. Todos requires a Neon Auth session. Both routes support direct navigation through the single Worker's SPA fallback.
 
 ## Sub-features
 
-- `nav-links` switches routes client-side through the `Home` and `Todos` links.
-- `nav-active` renders the active link in the foreground color and the other link muted.
-- `nav-deep-link` renders the right page when `/` or `/todos` is loaded directly.
+The public check covers `/`, `/todos`, `/sign-in`, and `/sign-up` as built SPA routes. The live runner covers anonymous protection, signed-in Home and Todos links, reload persistence, and protection after sign-out.
 
-## How to get to it (user POV)
+## How to get to it
 
-- Choose `Home` or `Todos` in the nav at the top of every page.
-- Type `/` or `/todos` into the address bar.
+Open the route directly or use the Home and Todos links. A signed-out Todos visit reaches the sign-in flow.
 
-## Driving it with drive.py
+## Drive and inspect
 
-Preconditions:
+Run the parent skill's public and live commands. Inspect the HTTP checks and `browser/01-anonymous`, `02-owner-before`, and `06-signed-out` evidence. A signed-out browser must not contain the New todo textbox, and its todo API call must return HTTP 401.
 
-- A fresh `up.sh` run with `doctor.sh` all `ok`.
+## Limits
 
-- **Links and active state.** Set a helper that reads which link has `aria-current="page"`, then run:
-
-  ```
-  ACT='expect-js "[...document.querySelectorAll(\"nav a\")].map(a => a.textContent + \":\" + (a.getAttribute(\"aria-current\") === \"page\" ? \"active\" : \"-\")).join()"'
-  $S/drive.py nav-links 'goto /' 'expect heading "Project ready!"' "$ACT Home:active,Todos:-" 'shot home-active' 'expect-js "(window.__spa = 1)" 1' 'click link Todos' 'expect-url /todos' 'expect heading Todos' 'expect-js window.__spa 1' "$ACT Home:-,Todos:active" 'shot todos-active' 'click link Home' 'expect-url /' 'expect-js window.__spa 1' "$ACT Home:active,Todos:-" 'shot back-home'
-  ```
-
-  `window.__spa` survives each click, which proves no full page load happened. The screenshots show the active link darker than the other one.
-- **Deep link.** Run `$S/drive.py nav-deep-link 'goto /todos' 'expect heading Todos' 'expect link Home' 'expect link Todos' "$ACT Home:-,Todos:active" 'shot deep-todos' 'goto /' 'expect heading "Project ready!"' "$ACT Home:active,Todos:-"`.
-
-## Gotchas
-
-- Unknown paths such as `/nope` have no custom 404 route. TanStack Router renders its default "Not Found" inside the layout, so don't treat that page as a feature.
-- Links preload on hover (`defaultPreload: "intent"`). Hovering `Todos` fires `GET /api/todos` before the click, so don't count requests on the assumption that the click sent the first one.
+An HTTP 200 SPA document alone does not prove route authorization. The browser and authenticated API checks are required for that claim. If a change affects active link styling or client-side navigation behavior, add those assertions to `scripts/neon-auth-e2e.mjs` and capture the relevant states.

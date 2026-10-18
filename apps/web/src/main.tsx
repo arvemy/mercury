@@ -1,33 +1,23 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { RouterProvider, createRouter } from "@tanstack/react-router"
 import { MantineProvider } from "@mantine/core"
 import { theme } from "@workspace/ui/theme"
-
+import { NeonAuthRouter } from "./lib/auth-router"
+import { AuthProvider } from "./lib/auth-provider"
 import "@mantine/core/styles.css"
-import { routeTree } from "./routeTree.gen"
 
 const queryClient = new QueryClient()
+const root = document.getElementById("root")
+if (!root) throw new Error("Missing root element")
 
-const router = createRouter({
-  routeTree,
-  context: { queryClient },
-  defaultPreload: "intent",
-  scrollRestoration: true,
-})
-
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router
-  }
-}
-
-createRoot(document.getElementById("root")!).render(
+createRoot(root).render(
   <StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="auto">
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <AuthProvider queryClient={queryClient}>
+          <NeonAuthRouter queryClient={queryClient} />
+        </AuthProvider>
       </QueryClientProvider>
     </MantineProvider>
   </StrictMode>

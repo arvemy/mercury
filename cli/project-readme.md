@@ -1,143 +1,190 @@
 # Mercury app
 
-A full-stack TypeScript app created with [Mercury](https://github.com/arvemy/mercury): React, Hono, and PostgreSQL in a pnpm and Turborepo monorepo.
+React and Hono run as one Cloudflare Worker with Static Assets. Neon Postgres stores private todos through Hyperdrive and Drizzle. Managed Neon Auth identifies users with same-origin session cookies.
 
-## Get started
+## Connect development services
 
-You need Node.js 22.22, 24.15, or 26 or later, pnpm 10, and Docker for the local database.
+Use a nonproduction [Neon project](https://neon.com/docs/manage/projects) on AWS with separate development and staging branches. Keep production in a separate project. Managed Neon Auth cannot use IP Allow or Private Networking. Keep existing network protections in place and choose a compatible project. Start with an empty database. Review [existing identities](#keep-existing-identity-ownership) before upgrading a populated database.
 
-```sh
-pnpm dev
-```
-
-This starts PostgreSQL in Docker, applies migrations, and runs the web app at http://localhost:5173 and the API at http://localhost:3000. Each of those steps does nothing when it is already done, so run `pnpm dev` every time.
-
-To use your own PostgreSQL instead of Docker, set `DATABASE_URL` in `apps/api/.env`, run `pnpm db:migrate`, then run `pnpm dev:apps`. It starts only the web app and the API.
-
-The todos page is a worked example of the full path from schema to screen. Delete it once you have your own.
-
-## What's inside
-
-| Path          | What it is                                                                                         |
-| ------------- | -------------------------------------------------------------------------------------------------- |
-| `apps/web`    | React 19 on Vite, with TanStack Router for file-based routing and TanStack Query for data fetching |
-| `apps/api`    | Hono on Node, with Drizzle ORM on PostgreSQL and zod validation                                    |
-| `packages/ui` | Shared Mantine theme configuration and custom components                                           |
-
-Vite+ 1.2.0 provides Vite, Vitest, Oxlint, and Oxfmt. A husky pre-commit hook
-and a GitHub Actions workflow are set up. The workspace catalog pins Vite+,
-and `packageManager` selects pnpm for its package-management commands.
-
-No global Vite+ installation is required. After `pnpm install`, use
-`pnpm exec vp check` for format, lint, and type checks. `pnpm exec vp test`
-runs all test projects. API tests need `DATABASE_URL` pointing to a migrated test
-database.
-
-`pnpm exec vp run dev` runs the full development script. To start only the Vite
-dev server, use `pnpm exec vp -C apps/web dev`. `pnpm exec vp run build` builds
-every package in dependency order through Turborepo. Built-in `vp test` runs
-Vitest, while `vp run test` runs the project's test script. See the
-[Vite+ command guide](https://viteplus.dev/guide).
-
-## Scripts
-
-Run these from the project root.
-
-| Script             | What it does                                                                  |
-| ------------------ | ----------------------------------------------------------------------------- |
-| `pnpm dev`         | Start the database, migrate, then start the web app and the API in watch mode |
-| `pnpm dev:apps`    | Start only the web app and the API in watch mode                              |
-| `pnpm prod`        | Build the production images and start the stack at http://localhost:8080      |
-| `pnpm prod:down`   | Stop the production stack                                                     |
-| `pnpm build`       | Build every package                                                           |
-| `pnpm test`        | Run the Vitest suites                                                         |
-| `pnpm check`       | Check formatting, lint rules, and types with Vite+                            |
-| `pnpm lint`        | Lint the repo with Oxlint                                                     |
-| `pnpm typecheck`   | Typecheck every package                                                       |
-| `pnpm format`      | Format the repo with Oxfmt                                                    |
-| `pnpm db:generate` | Write a migration from schema changes                                         |
-| `pnpm db:migrate`  | Apply migrations                                                              |
-| `pnpm db:studio`   | Open Drizzle Studio                                                           |
-
-## Production containers
-
-The web app and the API each build into their own image.
-
-- `apps/api/Dockerfile` builds the API into a Node 26 image that runs as a non-root user. Its health check calls `/api/health`. The same image runs migrations with `node dist/migrate.js`.
-- `apps/web/Dockerfile` builds the web app and serves it with Caddy on port 8080 as a non-root user. Caddy proxies `/api` to the API, so the browser talks to one origin.
-
-To run the whole stack like production, run:
+Install the [official Neon CLI](https://neon.com/docs/cli/install) and sign in if needed. Run setup from the project root:
 
 ```sh
-pnpm prod
+npm i -g neon@latest
+neon login
+neon init --services postgres,auth
 ```
 
-This builds both images and starts PostgreSQL, a one-off migration job, the API, and the web app. The API starts only after migrations succeed. Open http://localhost:8080. The API is not published on the host. Stop the stack with `pnpm prod:down`.
+During [init](https://neon.com/docs/cli/init), create or link the nonproduction project. To select an existing development branch, add `--branch <development-branch>`. The root `neon.ts` already declares `auth: true`, and the project includes `@neon/config` and `@neon/env`. If pnpm blocks a workspace-root dependency install, run `pnpm add -Dw @neon/config @neon/env`, then retry init. If existing agent tooling conflicts with setup, add `--no-agent-setup` on the retry.
 
-To deploy somewhere else, build the images from the project root:
+Confirm that `.neon` links to the development branch, then apply the config:
 
 ```sh
-docker build -f apps/api/Dockerfile -t my-app-api .
-docker build -f apps/web/Dockerfile -t my-app-web .
+neon deploy
 ```
 
-Then run them with these settings:
+[Deploy](https://neon.com/docs/cli/deploy) enables managed Neon Auth and pulls the branch's values into root `.env` if it exists, otherwise `.env.local`. The file contains pooled `DATABASE_URL`, direct owner `DATABASE_URL_UNPOOLED`, and the complete `NEON_AUTH_BASE_URL`. Mercury uses the unpooled owner URL for development migrations. Root Neon values are fallbacks. Explicit process variables and nonempty values in the app's local files take precedence.
 
-| Container  | Setting                                                                    | Default    |
-| ---------- | -------------------------------------------------------------------------- | ---------- |
-| API        | `DATABASE_URL`                                                             | Required   |
-| API        | `PORT`                                                                     | `3000`     |
-| Migrations | Same image as the API, command `node dist/migrate.js`, with `DATABASE_URL` | None       |
-| Web        | `API_UPSTREAM`, the host and port of the API                               | `api:3000` |
+In the development branch's [Managed Neon Auth settings](https://neon.com/docs/auth/overview), enable email/password signup and choose email verification by code, `otp`. Enable automatic verification emails on signup so Neon sends the initial code. Disable automatic verification emails on signin, where the form explicitly requests a code for an unverified account. Enable automatic signin after verification. Add `http://localhost:5173` to [trusted domains](https://neon.com/docs/auth/guides/configure-domains), including the scheme and port with no trailing slash. Each branch has its own Auth URL and auth state. Register the exact origin for staging and production too.
 
-Run the migration command before you start a new API version. The credentials in `docker-compose.yml` are for your machine only. Use your own database and secrets in production. TLS belongs in front of the web container, for example in your platform's load balancer.
+Fill the local files copied by `create-mercury`:
 
-## Backend
+| File                  | Values                                                                                                                                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/.env.local` | `APP_ORIGIN=http://localhost:5173` and `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE`, the direct URL for the restricted runtime role created below. Leave `NEON_AUTH_BASE_URL` blank to use Neon CLI values. |
+| `apps/web/.dev.vars`  | `NEON_AUTH_COOKIE_SECRET`, a random secret of at least 32 characters, unique to this environment.                                                                                                                         |
+| `apps/api/.env`       | Optional `DATABASE_URL` override for migrations. Leave it blank to use the root `DATABASE_URL_UNPOOLED`. Any override must be the database owner's direct URL.                                                            |
 
-The API lives in `apps/api` (`@workspace/api`). `pnpm dev` starts it alongside the web app, and Vite proxies `/api` to it. Set `PORT` to change its port (default `3000`).
+Generate the cookie secret with `node -e 'console.log(require("node:crypto").randomBytes(32).toString("base64url"))'`. Cloudflare loads development secrets exclusively from `.dev.vars.development` when present, otherwise `.dev.vars`. Fill the selected file even if your shell supplies a secret. Keep these local environment files out of Git. No `VITE_*` auth configuration, Neon management key, or auth provider key enters the browser. The official React client calls `/api/auth/*` on the app's origin. The Worker forwards those requests to the configured Neon Auth URL and validates the current session for private API access.
 
-The web app calls it through a typed client.
+When working from the Mercury repository, copy the examples first:
 
-```ts
-import { api } from "@/lib/api"
-
-const res = await api.api.health.$get()
+```sh
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
+cp apps/web/.dev.vars.example apps/web/.dev.vars
 ```
 
-`src/lib/api.ts` builds that client from `AppType`, exported by `apps/api/src/app.ts`, so request and response types flow end to end.
+Apply the initial migrations with `pnpm db:migrate`, then [create the runtime role](#create-the-runtime-database-role) and fill its local Hyperdrive URL. Run `pnpm dev` to validate configuration, apply migrations, and start the app at http://localhost:5173. Missing or placeholder values stop startup. The command does not provision services.
 
-## Frontend
+Open `/` for public health status. Open `/todos` to sign in or create an account. If verification is required, enter the emailed code or resend it. **Forgot password** opens the code-based reset form. Shared SMTP supports development codes. [Production requires custom SMTP](https://neon.com/docs/auth/production-checklist), which you configure in Neon. Check delivery, verification, resend, and reset with a real mailbox before production.
 
-Routing is file-based under `apps/web/src/routes`. The TanStack Router Vite plugin generates `src/routeTree.gen.ts` from those files. Keep it committed. Data fetching goes through TanStack Query, with `queryOptions` definitions in `src/lib/queries.ts` shared by route loaders and components.
+The API derives ownership from the verified Neon Auth user. A second user cannot read the first user's todos. Anonymous `/api/todos` requests return JSON with HTTP 401. Production uses HTTPS. Local Chromium accepts secure cookies on loopback HTTP, but local Safari requires HTTPS.
 
-## Database
+## Create the runtime database role
 
-`pnpm dev` starts PostgreSQL 18 with Docker Compose, using the credentials in `apps/api/.env`. To start only the database, run `docker compose up -d db`.
+After applying migrations, open the target branch and database in the Neon SQL Editor as the database owner. Create a separate runtime login for each environment with a different password. Replace `neondb`, `mercury_runtime`, and the password with that environment's values.
 
-The schema lives in `apps/api/src/db/schema.ts`. After changing it, run `pnpm db:generate` to write a migration, then `pnpm db:migrate` to apply it.
-
-## UI components
-
-Import standard components directly from Mantine.
-
-```tsx
-import { Button, TextInput } from "@mantine/core"
+```sql
+CREATE ROLE mercury_runtime LOGIN PASSWORD 'replace-with-a-random-password'
+	NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+GRANT CONNECT ON DATABASE neondb TO mercury_runtime;
+GRANT USAGE ON SCHEMA public TO mercury_runtime;
+GRANT SELECT, INSERT ON TABLE public.todos TO mercury_runtime;
 ```
 
-Icons come from [Tabler Icons](https://tabler.io/icons). Import each icon by name from `@tabler/icons-react` and pass it to props such as a button's `leftSection`.
+Create this role [with SQL](https://neon.com/docs/manage/roles#manage-roles-with-sql). Neon's Console, CLI, and API role-creation flows add `neon_superuser` membership. Keep the runtime role outside that membership and do not grant schema creation, table ownership, or migration privileges. The current identity column needs no separate sequence grant. Grant permissions for future tables explicitly when their features need them. The app does not read or write `neon_auth` tables through this runtime role.
 
-```tsx
-import { IconPlus } from "@tabler/icons-react"
+Use the runtime role's direct URL in Hyperdrive and the local Hyperdrive override. Keep the owner's direct URL in root `DATABASE_URL_UNPOOLED` or an explicit migration `DATABASE_URL`. The browser and deployed Worker runtime must not receive the owner credential.
+
+## Configure staging and production
+
+Use separate runtime credentials, branch Auth URLs, and cookie secrets for development, staging, and production. Each deployed environment needs its own Worker, Hyperdrive configuration, and HTTPS custom domain.
+
+1. Set the target database owner's direct `DATABASE_URL` in your shell or protected build environment. Apply migrations with `pnpm db:migrate:staging` or `pnpm db:migrate:production`. Migration commands do not require auth settings or Hyperdrive.
+2. Create a restricted runtime role in each database. Create a [Hyperdrive configuration](https://developers.cloudflare.com/hyperdrive/get-started/) with that role's direct URL. Disable query caching so a todo write is visible on the next read.
+3. Enable Managed Neon Auth on each target branch. Enable email/password signup, configure OTP verification and production SMTP, and register the app's exact HTTPS origin in trusted domains. Set `NEON_AUTH_BASE_URL` to that branch's complete returned URL.
+4. Set `CLOUDFLARE_ACCOUNT_ID`, `HYPERDRIVE_ID`, `APP_ORIGIN`, and `CLOUDFLARE_CUSTOM_DOMAIN` in each build environment. `APP_ORIGIN` includes the scheme and must match the custom domain. Configure Cloudflare deployment authentication. `apps/web/cloudflare.config.ts` defines the named Worker bindings.
+5. Add a distinct `NEON_AUTH_COOKIE_SECRET` as a Worker secret for each environment. For the first deployment, set `WORKER_SECRETS_FILE` to a JSON file mapping `NEON_AUTH_COOKIE_SECRET` to its value. Keep that file outside Git. Existing Workers can receive the secret through Cloudflare's CLI.
+6. Set the database owner's `DATABASE_URL` as a build secret for migrations. Remote commands do not load local `.env` files. Keep local `.env.local` and `.dev.vars` files out of remote builds.
+
+Use [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) with two named Workers connected to the repository.
+
+| Worker     | Production branch | Build command                       | Deploy command           |
+| ---------- | ----------------- | ----------------------------------- | ------------------------ |
+| Staging    | `staging`         | `pnpm verify && pnpm build:staging` | `pnpm deploy:staging`    |
+| Production | `main`            | `pnpm verify && pnpm build`         | `pnpm deploy:production` |
+
+Disable nonproduction branch builds and generic preview deployments on both Workers. Each deployment has an explicit database branch, Auth endpoint, Hyperdrive configuration, cookie secret, and domain. The deploy scripts migrate the target before publishing the built Worker with `cf deploy --prebuilt`. Review schema changes before deployment.
+
+## Keep existing identity ownership
+
+This version starts with a fresh database. The ownership migration refuses existing ownerless rows. Existing todo owners are text IDs, so a Clerk user ID does not become a Neon Auth ID after this migration. For existing users, create and review an explicit Clerk-ID-to-Neon-ID mapping before changing ownership. Never reassign existing records automatically or give all records to the first user who signs in.
+
+## Validate a deployment and recover
+
+Run the credential-free checks and configured live suite before promoting the same reviewed revision through staging to production. The live suite uses a local Worker and its own Neon branch. Deployed Hyperdrive, domains, SMTP delivery, email-code verification, and password recovery need separate verification.
+
+After each deployment, check the custom domain. Confirm `/api/health` returns HTTP 200 and anonymous `/api/todos` returns JSON with HTTP 401. Directly open `/todos`, `/sign-in`, `/sign-up`, and `/reset-password`. Register and verify an account with a real inbox, reset its password, sign in, create a todo, reload, confirm a second account cannot see it, and sign out. Inspect Worker errors and Neon connections.
+
+Record the Worker version and migration revision. Before changing a populated database, confirm a recoverable Neon recovery point and rehearse the migration on a separate branch. Prefer additive changes compatible with the previous Worker version.
+
+If checks fail, stop further deployments and use [Cloudflare rollback](https://developers.cloudflare.com/workers/versions-and-deployments/rollbacks/) to restore a previously verified compatible Worker. Check its bindings and branch Auth URL, then repeat health and authentication checks. Worker rollback does not undo database writes or schema changes. Repair the database with a reviewed forward migration, or rehearse recovery to a separate database before redirecting Hyperdrive. Do not automatically overwrite new writes.
+
+## Run checks
+
+The default checks need no cloud credentials.
+
+```sh
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:worker
 ```
 
-The app imports Mantine's core styles and uses `MantineProvider` with the shared theme from `packages/ui/src/theme.ts`. Edit that theme to customize colors, typography, and component defaults. Add reusable custom components under `packages/ui/src/components` and export them from `packages/ui/package.json`.
+`test:worker` runs the built Worker and checks public pages, health, anonymous HTTP 401 responses, and API routing. Deterministic auth fixtures exercise the real SDK boundary but do not prove live managed authentication.
 
-The theme follows the system color scheme by default. Use `useMantineColorScheme` when adding a color-scheme control. Mantine stores the choice under its native `mantine-color-scheme-value` key. Custom styles use CSS modules with Mantine's PostCSS preset.
+The pinned Miniflare version carries a local transport patch for [workerd issue 7634](https://github.com/cloudflare/workerd/issues/7634). It retires local preview connections after requests with bodies, while preserving bodyless connection reuse. `pnpm test` checks sockets, uploads, and streamed responses. After building, `pnpm test:preview-transport` repeats the original public HTTP sequence 1,000 times. Keep the patch until a supported upstream version passes these checks.
 
-## Agent skills
+The live suite needs an API key scoped to an isolated nonproduction Neon project. Set exactly these required values:
 
-Coding agents get skills for this stack in `.agents/skills`, linked into `.claude/skills` for Claude Code. The official Mantine skills cover comboboxes, forms, and custom components. Other skills cover Turborepo, React composition and performance, React view transitions, web design guidelines, web app testing, Conventional Commits, and Semantic Versioning. `skills-lock.json` records the sources of the skills installed with `npx skills`, and `npx skills update` refreshes them.
+```sh
+export NEON_API_KEY=...
+export NEON_PROJECT_ID=...
+export NEON_BRANCH_ID=...
+pnpm exec playwright install chromium
+pnpm test:integration
+```
 
-Use Mantine's [LLM documentation](https://mantine.dev/llms.txt) for component APIs, hooks, theming, and styling.
+`NEON_BRANCH_ID` is the parent to copy, with an empty database or the current owner-aware schema. The suite never migrates or configures the parent. Optional `NEON_DATABASE_NAME` and `NEON_ROLE_NAME` default to `neondb` and `neondb_owner`.
 
-`.mcp.json` registers Mantine's MCP server, which lets agents search the Mantine docs and look up component props. Claude Code asks you to approve it the first time. Other agents can add it with the command from [Mantine's guide](https://mantine.dev/guides/llms/), such as `codex mcp add mantine -- npx -y @mantine/mcp-server`.
+The suite creates an owned child branch, waits for operations, retrieves or enables that child's Auth, enables email/password, disables required email verification on that child, and confirms the settings. It migrates the child, runs API tests in an isolated schema, starts a scratch local Worker with a random cookie secret, and trusts its exact origin only on the child. Plain Playwright registers two accounts through the UI and proves signin, session restoration, todo persistence, database ownership, user isolation, and signout through cookies. It never uses fabricated users, bearer tokens, or custom identity headers as live proof.
+
+The live suite does not prove email delivery. In a nonproduction environment with required OTP verification and your configured mail provider, register with a real inbox. Enter actual received codes and check verification and reset resends. Create a private todo, reset the password, confirm the old password fails, and confirm the new password restores the same account and todo after reload. Keep passwords, codes, email bodies, session cookies, and tokens out of logs and screenshots. Verify production SMTP separately.
+
+To test the deployed Worker and Hyperdrive, sign in with `pnpm --dir apps/web exec cf auth login`. Keep the same Neon test variables and set `CLOUDFLARE_ACCOUNT_ID` and `WORKERS_DEV_SUBDOMAIN` to your account ID and existing workers.dev subdomain label. Then run `pnpm test:deployed`. This creates a temporary public Worker, a Hyperdrive configuration with query caching disabled, and an owned Neon child with a restricted runtime role. It checks the deployed bindings, HTTPS routes, static headers, cookie sessions, persistence, and ownership, then deletes those resources and verifies their removal. It preserves existing Workers and Hyperdrive configurations. No domain purchase is needed. Custom-domain attachment and DNS require a separate check on a domain you control.
+
+A `finally` block stops the owned Worker, deletes scratch settings, and deletes only the recorded child branch. Branch deletion removes the test users and sessions. Evidence stays in `.audit/integration-*/`, including `neon-branch.json`, `neon-auth.json`, `browser/neon-auth-users.json`, and `neon-cleanup.txt`. The branch has no automatic expiry. If the process is killed or cleanup fails, remove only the exact child ID recorded in `neon-branch.json`. Keep the parent. Missing configuration fails the command and never counts as a passing skip.
+
+For trusted CI runs, create a protected GitHub environment named `integration`:
+
+| Kind               | Names                                  |
+| ------------------ | -------------------------------------- |
+| Secrets            | `NEON_API_KEY`                         |
+| Variables          | `NEON_PROJECT_ID`, `NEON_BRANCH_ID`    |
+| Optional variables | `NEON_DATABASE_NAME`, `NEON_ROLE_NAME` |
+
+Require reviewers and trusted refs. Run through workflow dispatch, or set `RUN_LIVE_INTEGRATION=true` for trusted pushes after reviewing the code. Pull requests receive no live secrets. CI retains only sanitized, allowlisted text evidence. Keep credentials, session cookies, auth responses, and environment files out of evidence.
+
+## Use the commands
+
+| Command                       | Purpose                                                            |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `pnpm dev`                    | Validate development configuration, migrate, and start the Worker. |
+| `pnpm build`                  | Build the production Worker and assets.                            |
+| `pnpm build:staging`          | Build with staging bindings.                                       |
+| `pnpm preview`                | Run the built Worker locally.                                      |
+| `pnpm cf:types`               | Generate Cloudflare binding types.                                 |
+| `pnpm test`                   | Run credential-free unit suites.                                   |
+| `pnpm test:worker`            | Check built public routes and anonymous authorization.             |
+| `pnpm test:integration`       | Run the real Neon Auth and database suite.                         |
+| `pnpm test:deployed`          | Verify an owned live Worker and Hyperdrive on workers.dev.         |
+| `pnpm test:preview-transport` | Repeat the built preview HTTP sequence 1,000 times.                |
+| `pnpm check`                  | Check formatting, lint rules, and types.                           |
+| `pnpm db:generate`            | Generate a migration after a schema change.                        |
+| `pnpm db:migrate`             | Migrate development with the owner credential.                     |
+| `pnpm db:migrate:staging`     | Migrate with an explicit staging `DATABASE_URL`.                   |
+| `pnpm db:migrate:production`  | Migrate with an explicit production `DATABASE_URL`.                |
+| `pnpm deploy:staging`         | Migrate and deploy staging.                                        |
+| `pnpm deploy:production`      | Migrate and deploy production.                                     |
+
+Vite+ supplies Vite, Vitest, Oxlint, and Oxfmt through the pinned workspace catalog. Use root scripts to keep environment selection and migrations consistent.
+
+## Find the code
+
+| Path          | Contents                                                                               |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `apps/web`    | React, Neon Auth forms, TanStack Router, TanStack Query, and Cloudflare configuration. |
+| `apps/api`    | Worker entry, Hono routes, managed session checks, Drizzle schema, and migrations.     |
+| `packages/ui` | Shared Mantine theme and components.                                                   |
+| `scripts`     | Development, deployment, built Worker checks, and live integration checks.             |
+
+The web app uses a typed Hono RPC client. Route files live in `apps/web/src/routes`; TanStack Router generates `routeTree.gen.ts`. Add new SPA routes to `apps/web/public/_redirects`. The current routes are `/`, `/todos`, `/sign-in`, `/sign-up`, and `/reset-password`.
+
+Import standard components from `@mantine/core` and icons from `@tabler/icons-react`. Edit `packages/ui/src/theme.ts` for the shared theme. Mantine follows the system color scheme and stores a chosen preference under `mantine-color-scheme-value`.
+
+Agent skills in `.agents/skills` cover Cloudflare, Neon, Neon Auth, Hono, React, TanStack Router, Mantine, and workspace tooling. The CLI links installed skills into `.claude/skills`; `skills-lock.json` records their sources. See [Drizzle's node-postgres guide](https://orm.drizzle.team/docs/get-started-postgresql#node-postgres) for database access. `.mcp.json` registers [Mantine's MCP server](https://mantine.dev/guides/llms/).
+
+Use `postgres-best-practices` with `neon-postgres` for managed Neon behavior. Preserve [Neon Auth text `ownerId` values](#keep-existing-identity-ownership) and application ownership filters. Keep [restricted runtime grants](#create-the-runtime-database-role) and [Hyperdrive pooling](#configure-staging-and-production). Generic session `SET`, RLS, and server administration examples are not Mercury app configuration. Review extension and schema changes as migrations using the database owner. Drizzle's default migration runner uses a transaction. Keep `CREATE INDEX CONCURRENTLY` out of ordinary migrations and review it separately.

@@ -1,70 +1,24 @@
 ---
 name: verify
-description: Prove a Mercury change works in the real product. Mercury has two surfaces. One is the web app at / and /todos with its Hono /api and Postgres, driven in a browser by verify-mercury. The other is the create-mercury CLI, driven in a terminal by verify-create-mercury. This skill picks the surface from the files a change touches and runs that skill's launch, doctor, drive, evidence, and cleanup steps. Use it before you call a web, API, CLI, or template change done.
+description: Prove a Mercury app, API, database, authentication, CLI, or template change in the real product. Route app changes to the Cloudflare Worker, Neon, and Neon Auth driver, and template changes to the packed create-mercury terminal driver. Require both when a change ships in the starter.
 ---
 
 # Verify
 
-Mercury has two user-facing surfaces, and each one has its own driver skill. This skill picks the driver. The full instructions and the feature maps are in the driver skills.
+Read the selected driver's skill and feature map before running it.
 
-| Change touches | Surface | Driver skill |
-|---|---|---|
-| `apps/web`, `apps/api`, `packages/ui`, migrations | Web app in a browser, plus `/api` and Postgres | [`verify-mercury`](../verify-mercury/SKILL.md) |
-| `cli/`, or a file that ships in the template, such as a root config, `.agents/skills`, or `skills-lock.json` | `pnpm create mercury` in a terminal | [`verify-create-mercury`](../verify-create-mercury/SKILL.md) |
-| Both, such as a new dependency in `apps/web` | Both surfaces | Drive both. Start with `verify-mercury`. |
+| Change                                                                 | Driver                                                      |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `apps/web`, `apps/api`, `packages/ui`, migrations, auth, or deployment | [verify-mercury](../verify-mercury/SKILL.md).               |
+| `cli`, installed skills, root scripts, or template configuration       | [verify-create-mercury](../verify-create-mercury/SKILL.md). |
+| An app change that also ships in generated projects                    | Both drivers.                                               |
 
-The template is every git-tracked file except `cli/`, `.claude/`, the license files, the verify skills, and most of `.github/` (see `EXCLUDED` in `cli/scripts/snapshot.ts`). A change to the web app is also a change to every generated project.
+Start app verification with `.agents/skills/verify-mercury/scripts/run.sh --public`. It checks the built Worker's public routes, headers, asset caching, and anonymous authorization without credentials. Run the helper without a flag for real Neon Postgres and Neon Auth sessions. Use `--deployed` for an owned workers.dev HTTPS Worker, Hyperdrive, restricted SQL runtime role, UI writes, and deletion readbacks. Read [verify-mercury](../verify-mercury/SKILL.md) for the required Neon and Cloudflare configuration and manual real-inbox checks. Missing prerequisites or incomplete checks leave proof missing.
 
-Read the driver's `SKILL.md` and its `features/README.md` before the first drive. The commands below assume you run them from the repo root.
+For Cloudflare Vite plugin, Miniflare, or preview transport changes, run `node --test scripts/preview-transport.test.mjs`, then `pnpm build` and `pnpm test:preview-transport`. The exact-version Miniflare patch mitigates the local transport defect. Passing those checks does not establish that the upstream issue is fixed.
 
-## Launch
+Pack the CLI with `.agents/skills/verify-create-mercury/scripts/pack.sh`, then use its terminal driver. Mark new template files with `git add -N` before packing. Only git-tracked template files ship. Repository-only `.audit`, `docs`, CLI source, and verification skills stay out of the template.
 
-```bash
-W=.agents/skills/verify-mercury/scripts
-eval "$($W/up.sh)"          # web: isolated Postgres, API, and Vite on free ports; exports VERIFY_RUN
+Prove browser behavior through UI actions, capture states before and after, inspect HTTP responses and actual Neon rows, and retain cleanup evidence. Check email delivery manually with actual codes from a real inbox. Keep passwords, tokens, message bodies, and OTP values out of evidence. A workers.dev pass does not prove custom-domain DNS or TLS. Live `PASS` markers require successful behavior and owned-resource cleanup.
 
-C=.agents/skills/verify-create-mercury/scripts
-eval "$($C/pack.sh)"        # CLI: packs the tarball a user installs; exports VERIFY_CLI_RUN
-```
-
-Each command is ready when it exits 0 and prints a `ready:` line. Neither touches the user's `pnpm dev` stack, the `docker compose` database, or ports 3000, 5173, and 5432.
-
-## Doctor
-
-```bash
-$W/doctor.sh                # web: process groups, port ownership, DB, proxy health, browser, HEAD
-$C/doctor.sh                # CLI: tarball contents, HEAD, leftover tmux sessions
-```
-
-Both are read-only and exit 1 on any `FAIL`. Run the doctor before the first drive and again after anything odd. Never patch a half-dead run. Tear it down and launch again.
-
-## Drive
-
-```bash
-$W/drive.py <label> 'goto /todos' 'fill textbox "New todo" Milk' 'wait-response POST /api/todos && click button Add' 'shot after'
-$C/drive.py <label> 'run my-app' 'wait "Done. Next steps:" 300' 'expect-exit 0'
-```
-
-- The web `drive.py` is a `uv` script. It needs `uv` and the Chromium build that its doctor checks.
-- The CLI `drive.py` needs `tmux`.
-- Pick the recipe from the driver's feature map, and cover every entry point the feature file lists.
-
-## Evidence
-
-- Web evidence goes to `$VERIFY_RUN/evidence/<label>/`: screenshots, ARIA snapshots, `network.log`, `console.log`, and the output of `api.sh` and `sql.sh`.
-- CLI evidence goes to `$VERIFY_CLI_RUN/evidence/<label>/`: `steps.log`, `transcript.txt`, and `tree.txt`.
-- Both drivers hold proofs to the same standard. Drive the real user path, capture the state before and after, check side effects such as DB rows or files on disk, and mock nothing.
-- Report a proof by its evidence paths.
-
-## Cleanup
-
-```bash
-$W/down.sh                  # stops this run's processes and Postgres, keeps evidence/ and logs/
-$C/down.sh                  # kills this run's tmux server, deletes generated projects, keeps evidence/ and logs/
-```
-
-Runs stay under `~/.local/state/verify-mercury/runs/` and `~/.local/state/verify-create-mercury/runs/`. Run `down.sh` after failed attempts too. Never kill processes by name or by port.
-
-## Helpers
-
-This skill ships no scripts. Every helper lives in a driver's `scripts/` directory, and each driver's `SKILL.md` documents its helpers in a table.
+Prove CLI behavior from the final packed tarball, generated files, installed dependencies, and Git history. Repack and rerun the terminal driver after the last template change. Never treat compile success or a skipped live test as an end-to-end pass.

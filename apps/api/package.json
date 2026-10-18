@@ -4,24 +4,21 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
     "build": "tsc -b tsconfig.build.json",
-    "start": "node dist/index.js",
     "typecheck": "tsc -b",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "test": "vp test run"
+    "db:migrate": "tsx src/migrate.ts",
+    "test": "vp test run",
+    "test:integration": "vp test run --config vite.integration.config.ts"
   },
   "dependencies": {
-    "@hono/node-server": "^2.1.5",
     "@hono/zod-validator": "^0.9.1",
     "drizzle-orm": "^0.45.4",
     "drizzle-zod": "^0.8.3",
     "hono": "^4.13.13",
-    "postgres": "^3.4.9",
-    "zod": "^4.6.7"
+    "zod": "^4.6.7",
+    "pg": "8.23.1",
+    "@neondatabase/auth": "0.6.0-beta"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
@@ -29,7 +26,8 @@
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "@types/pg": "8.23.1"
   },
   "exports": {
     ".": {

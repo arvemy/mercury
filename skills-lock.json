@@ -1,6 +1,18 @@
 {
   "version": 1,
   "skills": {
+    "cf-cli": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cf-cli/SKILL.md",
+      "computedHash": "91da778590a135b120129c96f8f673e8005e8329d436cfb8787e70101d5a0dba"
+    },
+    "cloudflare": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare/SKILL.md",
+      "computedHash": "f08c8c1be96dfad7f9d5418b1345477dd2e55af58c8da01326c9a2616c7ed721"
+    },
     "hono": {
       "source": "honojs/skills",
       "ref": "c07147a801de9d2bb25578b70dae853179ae5f53",
@@ -25,6 +37,37 @@
       "sourceType": "github",
       "skillPath": "skills/mantine-form/SKILL.md",
       "computedHash": "3de4989c48fc109299ab2d728ff2360903c5f7c6b2138813a859b35d9f15857a"
+    },
+    "neon": {
+      "source": "neondatabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/neon/SKILL.md",
+      "computedHash": "e3860ad516498440f5a35a169cc92e3fb3ad80d29a5af8f27c2398f47d732afd"
+    },
+    "neon-auth": {
+      "source": "neondatabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/neon-auth/SKILL.md",
+      "computedHash": "5459d47c3fc325e09cb73641b15c48e5bc3e5d82a2059ba6ea8769bd73ff25e1"
+    },
+    "neon-postgres": {
+      "source": "neondatabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/neon-postgres/SKILL.md",
+      "computedHash": "0d936096676b18674d47828a87b21fcabf37cf0d7e3ed002e46e169eb7e0a7da"
+    },
+    "neon-postgres-branches": {
+      "source": "neondatabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/neon-postgres-branches/SKILL.md",
+      "computedHash": "d6b7ecfc52508c57bd3c8572a7cd0c582c256e36731124eb8598e8b24780ab1d"
+    },
+    "postgres-best-practices": {
+      "source": "neondatabase/postgres-skills",
+      "ref": "27fe45e0f71ea89a6eaf9ea4d2e4068957c81c26",
+      "sourceType": "github",
+      "skillPath": "skills/postgres-best-practices/SKILL.md",
+      "computedHash": "f0e9670a035895d50945ca10ed4466513df2c486414c6fcebd3b4e38cc98a88c"
     },
     "react-router": {
       "source": "tanstack/router",
@@ -85,6 +128,12 @@
       "sourceType": "github",
       "skillPath": "skills/webapp-testing/SKILL.md",
       "computedHash": "ad5b1fc52807e9afa4635e59218a026b164dc58b6c3f41b0f7c644dcd6ccf572"
+    },
+    "workers-best-practices": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/workers-best-practices/SKILL.md",
+      "computedHash": "e12970301753ed7eaa5ca375d4b98e0e36c9554e8f2809cb4b543c2ea7d9b4b8"
     }
   }
 }

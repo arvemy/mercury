@@ -1,0 +1,11 @@
+--- a/dist/src/index.js
++++ b/dist/src/index.js
+@@ -90391,7 +90391,7 @@
+       this.addHeaders(headers, path85);
+       options.headers = headers;
+       options.idempotent = false;
+-      options.reset = false;
++      options.reset = options.body != null;
+       const legacy = handler;
+       const onHeaders = legacy.onHeaders;
+       const onError = legacy.onError;

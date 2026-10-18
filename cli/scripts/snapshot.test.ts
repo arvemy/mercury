@@ -39,6 +39,8 @@ describe("isTemplateFile", () => {
     ).toBe(false)
     expect(isTemplateFile("LICENSE")).toBe(false)
     expect(isTemplateFile("NOTICE")).toBe(false)
+    expect(isTemplateFile(".audit/migration.tsv")).toBe(false)
+    expect(isTemplateFile("docs/migration-plan.md")).toBe(false)
   })
 })
 
@@ -67,6 +69,14 @@ describe("snapshot", () => {
     expect(files).toContain(".mcp.json")
     expect(files).toContain("packages/ui/src/theme.ts")
     expect(files).toContain("apps/web/postcss.config.cjs")
+    expect(files).toContain("apps/web/cloudflare.config.ts")
+    expect(files).toContain("scripts/neon-auth-e2e.mjs")
+    expect(files).toContain("patches/miniflare@5.20261012.0-beta.patch")
+    expect(files).toContain("scripts/preview-transport.test.mjs")
+    expect(files).not.toContain("scripts/clerk-e2e.mjs")
+    expect(files).not.toContain("docker-compose.yml")
+    expect(files).not.toContain("apps/api/Dockerfile")
+    expect(files).not.toContain("apps/web/Dockerfile")
     for (const skill of [
       "mantine-combobox",
       "mantine-form",

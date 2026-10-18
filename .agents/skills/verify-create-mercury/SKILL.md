@@ -5,7 +5,7 @@ description: Pack and drive the real create-mercury CLI (`pnpm create mercury <n
 
 # Verify create-mercury
 
-The user-facing surface is the `create-mercury` CLI, which a user runs as `pnpm create mercury my-app`. It copies a snapshot of this repo into a new directory, names the project, runs `git init`, `pnpm install`, and an initial commit, then prints next steps. The web app and API inside the generated project are covered by the sibling `verify-mercury` skill.
+The user-facing surface is the `create-mercury` CLI, which a user runs as `pnpm create mercury my-app`. It copies a snapshot of this repo into a new directory, names the project, runs `git init`, `pnpm install`, and an initial commit, then prints Neon Postgres and Neon Auth setup instructions before the development command. The web app and API inside the generated project are covered by the sibling `verify-mercury` skill.
 
 All helpers live in `.agents/skills/verify-create-mercury/scripts/`. The examples assume `S=.agents/skills/verify-create-mercury/scripts`, run from the repo root.
 
@@ -59,7 +59,7 @@ $S/drive.py --help                     # full step list
 These strings are stable in this CLI (`cli/src/index.ts`, `cli/src/scaffold.ts`):
 
 - the prompt `Project name: `
-- the success header `Done. Next steps:`, followed by `cd <name>` and `pnpm dev`
+- the success header `Done. Next steps:`, followed by `cd <name>`, Neon Postgres and Neon Auth setup instructions, the three local environment paths, and `After setup, run pnpm dev.`
 - the name rule `Project name must be lowercase and use only letters, digits, and - . _ ~`
 - the non-empty refusal `<absolute path> already exists and is not empty.`
 - the no-TTY usage line `Usage: pnpm create mercury <project-name>`
