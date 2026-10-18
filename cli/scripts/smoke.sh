@@ -16,7 +16,7 @@ fi
 cd "$work"
 env -u DATABASE_URL -u NEON_AUTH_BASE_URL -u NEON_AUTH_COOKIE_SECRET -u NEON_API_KEY -u NEON_PROJECT_ID -u NEON_BRANCH_ID pnpm dlx "$tarball" smoke-app
 cd smoke-app
-rg -q '<title>smoke-app</title>' apps/web/index.html || { echo "smoke: page title not set"; exit 1; }
+grep -Fq '<title>smoke-app</title>' apps/web/index.html || { echo "smoke: page title not set"; exit 1; }
 
 for file in .gitignore .npmrc .mcp.json apps/api/.env apps/web/.env.local apps/web/.dev.vars apps/web/cloudflare.config.ts; do
   [ -f "$file" ] || { echo "smoke: missing $file"; exit 1; }

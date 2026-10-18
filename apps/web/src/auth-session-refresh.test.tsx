@@ -3,6 +3,7 @@ import { MantineProvider } from "@mantine/core"
 import { createMemoryHistory } from "@tanstack/react-router"
 import {
   act,
+  cleanup,
   fireEvent,
   render,
   renderHook,
@@ -10,6 +11,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, it, vi } from "vite-plus/test"
+import { cleanStores } from "nanostores"
 import { authClient } from "./lib/auth-client"
 import { AuthProvider } from "./lib/auth-provider"
 import { useAppAuth } from "./lib/auth-context"
@@ -97,7 +99,11 @@ beforeEach(() => {
   )
 })
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  cleanup()
+  cleanStores(authClient.$store.atoms.session)
+  vi.unstubAllGlobals()
+})
 
 it("recovers the SDK's rejected unverified sign-in into email verification", async () => {
   renderApp("/sign-in")
