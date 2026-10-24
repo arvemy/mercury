@@ -11,12 +11,12 @@
     "test": "vp test run"
   },
   "dependencies": {
-    "@mantine/core": "^9.7.2",
-    "@mantine/hooks": "^9.7.2",
+    "@mantine/core": "^9.7.3",
+    "@mantine/hooks": "^9.7.3",
     "@tabler/icons-react": "^3.49.0",
-    "@tanstack/react-query": "^5.104.3",
-    "@tanstack/react-query-devtools": "^5.104.3",
-    "@tanstack/react-router": "^1.170.44",
+    "@tanstack/react-query": "^5.104.5",
+    "@tanstack/react-query-devtools": "^5.104.5",
+    "@tanstack/react-router": "^1.170.45",
     "@tanstack/react-router-devtools": "^1.167.2",
     "@workspace/ui": "workspace:*",
     "hono": "^4.13.13",
@@ -25,7 +25,7 @@
     "@neondatabase/auth": "0.6.0-beta"
   },
   "devDependencies": {
-    "@tanstack/router-plugin": "^1.168.46",
+    "@tanstack/router-plugin": "^1.168.47",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -39,7 +39,7 @@
     "nanostores": "1.5.5",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vite": "catalog:",
-    "postcss": "^8.5.30",
+    "postcss": "^8.5.31",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
     "vite-plus": "catalog:",
